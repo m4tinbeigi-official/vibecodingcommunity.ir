@@ -3,14 +3,17 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { User, LogOut, Settings, Bell, UserPlus } from 'lucide-react'
+import { User, LogOut, Settings, Bell, UserPlus, Briefcase, ArrowUp, Plus, Edit, Trash2 } from 'lucide-react'
 import axios from 'axios'
+import Link from 'next/link'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [userData, setUserData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [projects, setProjects] = useState<any[]>([])
+  const [projectsLoading, setProjectsLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -32,6 +35,38 @@ export default function DashboardPage() {
       console.error('Error checking onboarding:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadProjects()
+    }
+  }, [status])
+
+  const loadProjects = async () => {
+    setProjectsLoading(true)
+    try {
+      const response = await axios.get('/api/user/projects')
+      setProjects(response.data.projects)
+    } catch (error) {
+      console.error('Error loading projects:', error)
+    } finally {
+      setProjectsLoading(false)
+    }
+  }
+
+  const deleteProject = async (slug: string) => {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید این پروژه را حذف کنید؟')) {
+      return
+    }
+
+    try {
+      await axios.delete(`/api/projects/${slug}`)
+      loadProjects()
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      alert('خطا در حذف پروژه')
     }
   }
 
@@ -134,12 +169,18 @@ export default function DashboardPage() {
             اینجا می‌توانید با برنامه‌نویسان دیگر ارتباط برقرار کنید، پروژه‌های خود را به اشتراک بگذارید و مهارت‌های خود را تقویت کنید.
           </p>
           <div className="flex gap-4">
-            <button className="px-4 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium">
+            <Link
+              href="/projects"
+              className="px-4 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+            >
               مشاهده پروژه‌ها
-            </button>
-            <button className="px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium">
+            </Link>
+            <Link
+              href="/projects/new"
+              className="px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium"
+            >
               شروع پروژه جدید
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -149,9 +190,9 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               پروژه‌های من
             </h3>
-            <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">0</p>
+            <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{projects.length}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              پروژه فعال
+              پروژه ثبت شده
             </p>
           </div>
 
@@ -161,7 +202,7 @@ export default function DashboardPage() {
             </h3>
             <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">0</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              چالش تکمیل شده
+              به زودی
             </p>
           </div>
 
@@ -169,11 +210,121 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               امتیاز
             </h3>
-            <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">0</p>
+            <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{userData.points || 0}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               امتیاز کل
             </p>
           </div>
+        </div>
+
+        {/* My Projects Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                پروژه‌های من
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                پروژه‌هایی که ثبت کرده‌اید
+              </p>
+            </div>
+            <Link
+              href="/projects/new"
+              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>پروژه جدید</span>
+            </Link>
+          </div>
+
+          {projectsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-8">
+              <Briefcase className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                هنوز پروژه‌ای ثبت نکرده‌اید
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                اولین پروژه خود را ثبت کنید
+              </p>
+              <Link
+                href="/projects/new"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>ثبت پروژه</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {projects.map((project) => (
+                <div
+                  key={project.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {project.title}
+                        </h3>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          project.status === 'launched' ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
+                          project.status === 'mvp' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' :
+                          project.status === 'in_development' ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
+                          'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}>
+                          {project.status === 'launched' ? 'منتشر شده' :
+                           project.status === 'mvp' ? 'MVP' :
+                           project.status === 'in_development' ? 'در حال توسعه' : 'ایده'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-1">
+                        {project.shortDescription}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <ArrowUp className="w-4 h-4" />
+                          <span>{project.upvotesCount} رای</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Briefcase className="w-4 h-4" />
+                          <span>{project.category}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        className="p-2 text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
+                        title="مشاهده"
+                      >
+                        <Briefcase className="w-5 h-5" />
+                      </Link>
+                      <Link
+                        href={`/projects/${project.slug}/edit`}
+                        className="p-2 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                        title="ویرایش"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </Link>
+                      <button
+                        onClick={() => deleteProject(project.slug)}
+                        className="p-2 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                        title="حذف"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Coming Soon */}

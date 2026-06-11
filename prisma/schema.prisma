@@ -62,6 +62,57 @@ model User {
 
   accounts        Account[]
   sessions        Session[]
+  projects        Project[]
+  upvotes         ProjectUpvote[]
+}
+
+// Project model
+model Project {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  title             String
+  shortDescription  String
+  fullDescription   String   @db.Text
+  problemSolved     String?  @db.Text
+  targetAudience    String?  @db.Text
+  category          String
+  status            String   // idea, mvp, launched, in_development
+  tools             String[] @default([])
+  technologies      String[] @default([])
+  demoUrl           String?
+  githubUrl         String?
+  imageUrl          String?
+  images            String[] @default([])
+  lookingForTeammates Boolean @default(false)
+  neededRoles       String[] @default([])
+  featured          Boolean  @default(false)
+  upvotesCount      Int      @default(0)
+  ownerId           String
+  owner             User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  upvotes           ProjectUpvote[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([slug])
+  @@index([ownerId])
+  @@index([category])
+  @@index([status])
+  @@index([featured])
+  @@index([createdAt])
+}
+
+// Project Upvote model
+model ProjectUpvote {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
 }
 
 // NextAuth Account

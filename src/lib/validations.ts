@@ -183,3 +183,48 @@ export type OnboardingStep4Input = z.infer<typeof onboardingStep4Schema>
 export type OnboardingStep5Input = z.infer<typeof onboardingStep5Schema>
 export type OnboardingStep6Input = z.infer<typeof onboardingStep6Schema>
 export type ProfileEditInput = z.infer<typeof profileEditSchema>
+
+// Project validation schemas
+export const projectSchema = z.object({
+  title: z.string().min(3, 'عنوان باید حداقل 3 حرف باشد').max(100, 'عنوان باید حداکثر 100 حرف باشد'),
+  shortDescription: z.string().min(10, 'توضیح کوتاه باید حداقل 10 حرف باشد').max(200, 'توضیح کوتاه باید حداکثر 200 حرف باشد'),
+  fullDescription: z.string().min(20, 'توضیح کامل باید حداقل 20 حرف باشد').max(5000, 'توضیح کامل باید حداکثر 5000 حرف باشد'),
+  problemSolved: z.string().max(2000, 'مشکل حل شده باید حداکثر 2000 حرف باشد').optional(),
+  targetAudience: z.string().max(1000, 'مخاطبان هدف باید حداکثر 1000 حرف باشد').optional(),
+  category: z.string().min(1, 'دسته‌بندی الزامی است'),
+  status: z.enum(['idea', 'mvp', 'launched', 'in_development'], {
+    errorMap: () => ({ message: 'وضعیت نامعتبر است' })
+  }),
+  tools: z.array(z.string()).default([]),
+  technologies: z.array(z.string()).default([]),
+  demoUrl: z.string().url('آدرس دمو نامعتبر است').optional().or(z.literal('')),
+  githubUrl: z.string().url('آدرس گیت‌هاب نامعتبر است').optional().or(z.literal('')),
+  imageUrl: z.string().url('آدرس تصویر نامعتبر است').optional().or(z.literal('')),
+  images: z.array(z.string().url()).default([]),
+  lookingForTeammates: z.boolean().default(false),
+  neededRoles: z.array(z.string()).default([]),
+})
+
+export const PROJECT_CATEGORIES = [
+  'SaaS / Micro-SaaS',
+  'Web Application',
+  'Mobile Application',
+  'Telegram Bot',
+  'AI Tool',
+  'Automation Tool',
+  'E-commerce',
+  'Education',
+  'Productivity',
+  'Social',
+  'Developer Tools',
+  'Other',
+] as const
+
+export const PROJECT_STATUSES = [
+  { value: 'idea', label: 'ایده' },
+  { value: 'mvp', label: 'MVP' },
+  { value: 'in_development', label: 'در حال توسعه' },
+  { value: 'launched', label: 'منتشر شده' },
+] as const
+
+export type ProjectInput = z.infer<typeof projectSchema>
