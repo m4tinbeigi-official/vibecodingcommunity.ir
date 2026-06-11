@@ -1,58 +1,56 @@
 # تنظیمات SMS.ir
 
-توکن API با موفقیت در `.env` file قرار گرفت:
+## ✅ تمام تنظیمات کامل شد!
 
+**توکن API:**
 ```env
 SMSIR_API_KEY=eQHDpjrkvOMrk0qeedMINx6B3Wwad85tE2GXgWD3GYxlY8B8
 ```
 
-## مرحله بعد: دریافت Message ID
+**شناسه قالب (Message ID):**
+```env
+SMSIR_MESSAGE_ID=622349
+```
 
-برای ارسال SMS از SMS.ir، باید یک Template با پارامتر `OTP` بسازید:
-
-1. به پنل SMS.ir بروید: https://panel.sms.ir/
-2. از منو، **Templates** یا **الگوهای پیامکی** را انتخاب کنید
-3. **New Template** یا **الگوی جدید** بسازید
-4. متن پیام را این‌طور بنویسید:
-   ```
-   کد تایید شما: {{OTP}}
-   ```
-5. بعد از ذخیره، **Message ID** را کپی کنید
-6. Message ID را در `.env` file قرار دهید:
-   ```env
-   SMSIR_MESSAGE_ID=12345
-   ```
+**متن پیامک:**
+```
+کد: #OTP#
+جامعه وایب کدینگ ایران
+```
 
 ## تست SMS
-
-بعد از تنظیم Message ID:
 
 ```bash
 # پروژه را اجرا کنید
 npm run dev
 
-# تست ارسال OTP از طریق:
-# http://localhost:3000/verify-phone
+# تست ارسال OTP:
+http://localhost:3000/verify-phone
 ```
 
-## نکات مهم
+## نحوه کارکرد
 
-- **در Development**: کد OTP در console چاپ می‌شود (هزینه صفر)
-- **در Production**: SMS واقعی ارسال می‌شود
-- **Rate Limiting**: 3 SMS در 15 دقیقه برای هر شماره
-- **OTP Expiration**: 5 دقیقه اعتبار
+1. کاربر شماره موبایل وارد می‌کند
+2. سرور کد 4 رقمی تولید می‌کند
+3. SMS.ir پیامک ارسال می‌کند:
+   ```
+   کد: 1234
+   جامعه وایب کدینگ ایران
+   ```
+4. کد با bcrypt هش می‌شود
+5. در دیتابیس با 5 دقیقه انقضا ذخیره می‌شود
 
-## Troublehooting
+## نکات امنیتی
 
-اگر SMS ارسال نشد:
-
-1. API Key را بررسی کنید: ✅ (تنظیم شده)
-2. Message ID را بررسی کنید: ❓ (باید تنظیم شود)
-3. موجودی حساب SMS.ir را چک کنید
-4. Template باید با پارامتر `OTP` ساخته شده باشد
+- ✅ Rate Limiting: 3 SMS در 15 دقیقه
+- ✅ OTP Hashing: bcrypt با 10 rounds
+- ✅ OTP Expiration: 5 دقیقه
+- ✅ Server-side فقط: API key هرگز leak نمی‌شود
 
 ---
 
-**وضعیت فعلی:**
+**وضعیت:**
 - ✅ API Key: تنظیم شده
-- ⏳ Message ID: در انتظار تنظیم
+- ✅ Message ID: تنظیم شده (622349)
+- ✅ Template: "کد: #OTP#" - جامعه وایب کدینگ ایران
+- ✅ آماده استفاده
