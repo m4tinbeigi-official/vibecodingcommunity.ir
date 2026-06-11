@@ -1,0 +1,49 @@
+# Caddyfile for Vibe Coding Community
+# Automatic HTTPS with Let's Encrypt
+
+# Main domain - vibecodingcommunity.ir
+vibecodingcommunity.ir {
+    reverse_proxy app:3000
+
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # Log access
+    log {
+        output file /var/log/caddy/vibe-access.log
+    }
+}
+
+# www redirect to non-www
+www.vibecodingcommunity.ir {
+    redir https://vibecodingcommunity.ir{uri} permanent
+}
+
+# Multi-domain support examples (commented out - uncomment and modify for future projects)
+
+# Example: Second project on subdomain
+# project2.vibecodingcommunity.ir {
+#     reverse_proxy project2:3001
+# }
+
+# Example: Completely different domain
+# another-domain.ir {
+#     reverse_proxy project3:3002
+#     header {
+#         X-Frame-Options "SAMEORIGIN"
+#         X-Content-Type-Options "nosniff"
+#         -Server
+#     }
+# }
+
+# Local development override
+# This block allows local development without HTTPS
+:80 {
+    reverse_proxy app:3000
+}
