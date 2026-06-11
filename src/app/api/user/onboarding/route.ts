@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { onboardingStep1Schema } from '@/lib/validations'
 
 // POST /api/user/onboarding - Update onboarding step
 export async function POST(request: NextRequest) {
@@ -37,6 +38,32 @@ export async function POST(request: NextRequest) {
     // Map step data to database fields
     switch (step) {
       case 1:
+        // Validate step 1 data
+        const validatedStep1 = onboardingStep1Schema.safeParse(data)
+        if (!validatedStep1.success) {
+          return NextResponse.json(
+            { error: 'Validation failed', details: validatedStep1.error.errors },
+            { status: 400 }
+          )
+        }
+
+        // Check username availability if provided
+        if (data.username) {
+          const existingUser = await prisma.user.findFirst({
+            where: {
+              username: data.username,
+              NOT: { id: session.user.id }
+            }
+          })
+
+          if (existingUser) {
+            return NextResponse.json(
+              { error: 'این نام کاربری قبلاً گرفته شده است' },
+              { status: 400 }
+            )
+          }
+        }
+
         Object.assign(updateData, {
           firstName: data.firstName,
           lastName: data.lastName,
