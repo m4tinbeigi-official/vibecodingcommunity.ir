@@ -11,18 +11,57 @@ datasource db {
 
 // User model
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  phone         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          String    @default("user")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  name            String?   // Legacy field, kept for compatibility
+  email           String?   @unique
+  phone           String?   @unique
+  emailVerified   DateTime?
+  image           String?   // Legacy avatar field
+  role            String    @default("user")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
+  // Profile basic info
+  firstName       String?
+  lastName        String?
+  displayName     String?
+  username        String?   @unique
+  avatarUrl       String?
+  coverUrl        String?
+  city            String?
+  bio             String?   @db.Text
+  telegramLink    String?
+  linkedinLink    String?
+  githubLink      String?
+  websiteLink     String?
+
+  // Professional info
+  mainField       String?
+  secondaryFields String[]  @default([])
+  experienceLevel String?
+  tools           String[]  @default([])
+  skills          String[]  @default([])
+
+  // Goals and collaboration
+  membershipGoals String[]  @default([])
+  collaborationStatus String?
+
+  // Privacy settings
+  showEmail       Boolean   @default(false)
+  showPhone       Boolean   @default(false)
+  showSocialLinks Boolean   @default(true)
+  profilePublic   Boolean   @default(true)
+
+  // Onboarding
+  onboardingCompleted Boolean @default(false)
+  onboardingStep   Int       @default(1)
+
+  // Gamification (placeholder)
+  points          Int       @default(0)
+  level           Int       @default(1)
+
+  accounts        Account[]
+  sessions        Session[]
 }
 
 // NextAuth Account

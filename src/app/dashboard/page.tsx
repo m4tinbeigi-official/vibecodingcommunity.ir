@@ -2,20 +2,40 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { User, LogOut, Settings, Bell } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { User, LogOut, Settings, Bell, UserPlus } from 'lucide-react'
+import axios from 'axios'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [userData, setUserData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
+    } else if (status === 'authenticated') {
+      checkOnboarding()
     }
   }, [status, router])
 
-  if (status === 'loading') {
+  const checkOnboarding = async () => {
+    try {
+      const response = await axios.get('/api/user/profile')
+      setUserData(response.data)
+
+      if (!response.data.onboardingCompleted) {
+        router.push(`/onboarding?step=${response.data.onboardingStep}`)
+      }
+    } catch (error) {
+      console.error('Error checking onboarding:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -26,7 +46,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!session) {
+  if (!session || !userData) {
     return null
   }
 
@@ -44,10 +64,19 @@ export default function DashboardPage() {
               داشبورد
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              خوش آمدید، {session.user.name || 'کاربر'}!
+              خوش آمدید، {userData.displayName || session.user.name || 'کاربر'}!
             </p>
           </div>
           <div className="flex items-center gap-4">
+            {/* Edit Profile */}
+            <button
+              onClick={() => router.push('/profile/edit')}
+              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              title="ویرایش پروفایل"
+            >
+              <UserPlus className="w-6 h-6" />
+            </button>
+
             {/* Notifications */}
             <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
               <Bell className="w-6 h-6" />
@@ -75,18 +104,22 @@ export default function DashboardPage() {
         {/* User Info Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center overflow-hidden">
+              {userData.avatarUrl ? (
+                <img src={userData.avatarUrl} alt={userData.displayName} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+              )}
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {session.user.name || 'کاربر'}
+                {userData.displayName || session.user.name || 'کاربر'}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {session.user.email || session.user.phone || 'ایمیل یا شماره موبایل'}
+                @{userData.username || 'username'} {userData.city && `• ${userData.city}`}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                سطح دسترسی: {session.user.role === 'admin' ? 'مدیر' : 'کاربر'}
+                {userData.mainField || 'حوزه فعالیت'} {userData.experienceLevel && `• ${userData.experienceLevel}`}
               </p>
             </div>
           </div>
