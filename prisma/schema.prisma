@@ -23,7 +23,6 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
-  posts         Post[]
 }
 
 // NextAuth Account
@@ -64,14 +63,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Post model (example)
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?  @db.Text
-  published Boolean  @default(false)
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// OTP for phone verification
+model PhoneOTP {
+  id         String   @id @default(cuid())
+  phoneNumber String
+  otpHash    String
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([phoneNumber, expiresAt])
+}
+
+// Rate limiting for OTP
+model RateLimit {
+  id         String   @id @default(cuid())
+  identifier String   // IP or phone number
+  action     String   // 'send_otp', 'verify_otp'
+  count      Int      @default(1)
+  windowStart DateTime @default(now())
+
+  @@unique([identifier, action, windowStart])
+  @@index([identifier, action])
 }

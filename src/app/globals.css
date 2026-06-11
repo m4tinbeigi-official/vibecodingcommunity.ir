@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -16,7 +18,7 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+    @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-vazir;
   }
 }
 
@@ -25,6 +27,36 @@
   direction: rtl;
 }
 
-[dir="rtl"] .flex-row {
-  flex-direction: row-reverse;
+/* Flip specific utilities for RTL */
+[dir="rtl"] .space-x-1 > * + * {
+  @apply mr-0 ml-1;
+}
+
+[dir="rtl"] .space-x-2 > * + * {
+  @apply mr-0 ml-2;
+}
+
+[dir="rtl"] .space-x-4 > * + * {
+  @apply mr-0 ml-4;
+}
+
+/* Margin utilities for RTL */
+[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+[dir="rtl"] .mr-4 {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+[dir="rtl"] .ml-4 {
+  margin-left: 0;
+  margin-right: 1rem;
 }

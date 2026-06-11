@@ -22,6 +22,9 @@ const config: Config = {
           900: '#0c4a6e',
         },
       },
+      fontFamily: {
+        vazir: ['var(--font-vazir)', 'sans-serif'],
+      },
     },
   },
   plugins: [],
