@@ -9,6 +9,8 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },
       include: {
@@ -23,13 +25,8 @@ export async function GET(
             bio: true,
           }
         },
-        upvotes: {
-          where: {
-            userId: request.headers.get('x-user-id') || ''
-          },
-          select: {
-            userId: true
-          }
+        _count: {
+          select: { upvotes: true }
         }
       }
     })
@@ -41,7 +38,24 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(project)
+    // Check if current user has upvoted
+    let hasUpvoted = false
+    if (session?.user?.id) {
+      const upvote = await prisma.projectUpvote.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: project.id,
+            userId: session.user.id
+          }
+        }
+      })
+      hasUpvoted = !!upvote
+    }
+
+    return NextResponse.json({
+      ...project,
+      hasUpvoted
+    })
 
   } catch (error) {
     console.error('Error getting project:', error)

@@ -1,7 +1,12 @@
-import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import { Briefcase, Users, ArrowUp, Calendar, MapPin, Link as LinkIcon, Github } from 'lucide-react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Briefcase, Users, ArrowUp, Calendar, MapPin, Link as LinkIcon, Github, Send, Loader2 } from 'lucide-react'
 import { PROJECT_STATUSES } from '@/lib/validations'
+import { useSession } from 'next-auth/react'
+import axios from 'axios'
+import Link from 'next/link'
 
 interface PageProps {
   params: {
@@ -9,57 +14,81 @@ interface PageProps {
   }
 }
 
-async function getProject(slug: string, userId?: string) {
-  const project = await prisma.project.findUnique({
-    where: { slug },
-    include: {
-      owner: {
-        select: {
-          id: true,
-          displayName: true,
-          username: true,
-          avatarUrl: true,
-          city: true,
-          mainField: true,
-          bio: true,
-          experienceLevel: true,
-          telegramLink: true,
-        }
-      },
-      upvotes: {
-        where: { userId: userId || '' },
-        select: { userId: true }
+export default function ProjectPage({ params }: PageProps) {
+  const router = useRouter()
+  const { data: session } = useSession()
+  const [project, setProject] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [upvoted, setUpvoted] = useState(false)
+  const [upvotesCount, setUpvotesCount] = useState(0)
+  const [upvoting, setUpvoting] = useState(false)
+
+  useEffect(() => {
+    loadProject()
+  }, [params.slug])
+
+  const loadProject = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(`/api/projects/${params.slug}`)
+      setProject(response.data)
+      setUpvoted(response.data.hasUpvoted || false)
+      setUpvotesCount(response.data.upvotesCount || 0)
+    } catch (error) {
+      console.error('Error loading project:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUpvote = async () => {
+    if (!session) {
+      router.push('/login')
+      return
+    }
+
+    setUpvoting(true)
+    try {
+      const response = await axios.post(`/api/projects/${params.slug}/upvote`)
+      setUpvoted(response.data.upvoted)
+      setUpvotesCount(response.data.upvotesCount)
+    } catch (error: any) {
+      console.error('Error upvoting:', error)
+      if (error.response?.status === 401) {
+        router.push('/login')
       }
-    }
-  })
-
-  return project
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const project = await getProject(params.slug)
-
-  if (!project) {
-    return {
-      title: 'پروژه یافت نشد',
+    } finally {
+      setUpvoting(false)
     }
   }
 
-  return {
-    title: `${project.title} | انجمن برنامه‌نویسی وایب`,
-    description: project.shortDescription,
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    )
   }
-}
-
-export default async function ProjectPage({ params }: PageProps) {
-  const project = await getProject(params.slug)
 
   if (!project) {
-    notFound()
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            پروژه یافت نشد
+          </h1>
+          <button
+            onClick={() => router.push('/projects')}
+            className="text-primary-600 hover:text-primary-700"
+          >
+            بازگشت به پروژه‌ها
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const status = PROJECT_STATUSES.find(s => s.value === project.status)
-  const isUpvoted = project.upvotes.length > 0
 
   return (
     <div className="min-h-screen">
@@ -114,7 +143,7 @@ export default async function ProjectPage({ params }: PageProps) {
 
                 <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <ArrowUp className="w-4 h-4" />
-                  <span>{project.upvotesCount} رای</span>
+                  <span>{upvotesCount} رای</span>
                 </div>
               </div>
 
@@ -159,7 +188,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     تکنولوژی‌ها
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech) => (
+                    {project.technologies.map((tech: string) => (
                       <span
                         key={tech}
                         className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm"
@@ -178,7 +207,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     ابزارها
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {project.tools.map((tool) => (
+                    {project.tools.map((tool: string) => (
                       <span
                         key={tool}
                         className="px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-sm"
@@ -225,7 +254,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     تصاویر پروژه
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {project.images.map((image, index) => (
+                    {project.images.map((image: string, index: number) => (
                       <img
                         key={index}
                         src={image}
@@ -246,7 +275,7 @@ export default async function ProjectPage({ params }: PageProps) {
                   به دنبال هم‌تیمی
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {project.neededRoles.map((role) => (
+                  {project.neededRoles.map((role: string) => (
                     <span
                       key={role}
                       className="px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-sm"
@@ -267,30 +296,35 @@ export default async function ProjectPage({ params }: PageProps) {
                 سازنده پروژه
               </h3>
 
-              <div className="flex items-center gap-4 mb-4">
-                {project.owner.avatarUrl ? (
-                  <img
-                    src={project.owner.avatarUrl}
-                    alt={project.owner.displayName || 'Avatar'}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                      {project.owner.displayName?.charAt(0)}
-                    </span>
-                  </div>
-                )}
+              <Link
+                href={`/members/${project.owner.username}`}
+                className="block"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  {project.owner.avatarUrl ? (
+                    <img
+                      src={project.owner.avatarUrl}
+                      alt={project.owner.displayName || 'Avatar'}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                        {project.owner.displayName?.charAt(0)}
+                      </span>
+                    </div>
+                  )}
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    {project.owner.displayName}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    @{project.owner.username}
-                  </p>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {project.owner.displayName}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      @{project.owner.username}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               {project.owner.city && (
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -313,7 +347,7 @@ export default async function ProjectPage({ params }: PageProps) {
               )}
 
               <button
-                onClick={() => (window.location.href = `/members/${project.owner.username}`)}
+                onClick={() => router.push(`/members/${project.owner.username}`)}
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 مشاهده پروفایل
@@ -326,7 +360,7 @@ export default async function ProjectPage({ params }: PageProps) {
                   rel="noopener noreferrer"
                   className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  <LinkIcon className="w-4 h-4" />
+                  <Send className="w-4 h-4" />
                   <span>تماس در تلگرام</span>
                 </a>
               )}
@@ -346,48 +380,34 @@ export default async function ProjectPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Upvote Button (Client Component) */}
+            {/* Upvote Button */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               <button
-                id="upvote-btn"
+                onClick={handleUpvote}
+                disabled={upvoting}
                 className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-colors ${
-                  isUpvoted
+                  upvoted
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <ArrowUp className="w-5 h-5" />
-                <span>{isUpvoted ? 'رای داده شده' : 'رای دهید'}</span>
-                <span className="text-sm">({project.upvotesCount})</span>
+                {upvoting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>در حال ثبت...</span>
+                  </>
+                ) : (
+                  <>
+                    <ArrowUp className="w-5 h-5" />
+                    <span>{upvoted ? 'رای داده شده' : 'رای دهید'}</span>
+                    <span className="text-sm">({upvotesCount})</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Client-side Script for Upvote */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          document.getElementById('upvote-btn')?.addEventListener('click', async () => {
-            const btn = document.getElementById('upvote-btn');
-            try {
-              const response = await fetch('/api/projects/${params.slug}/upvote', {
-                method: 'POST',
-              });
-              const data = await response.json();
-              if (data.upvoted) {
-                btn.className = 'w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-colors bg-primary-600 text-white';
-                btn.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg><span>رای داده شده</span><span class="text-sm">(' + data.upvotesCount + ')</span>';
-              } else {
-                btn.className = 'w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-colors bg-gray-100 text-gray-900 hover:bg-gray-200';
-                btn.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg><span>رای دهید</span><span class="text-sm">(' + data.upvotesCount + ')</span>';
-              }
-            } catch (error) {
-              console.error('Error upvoting:', error);
-            }
-          });
-        `
-      }} />
     </div>
   )
 }
