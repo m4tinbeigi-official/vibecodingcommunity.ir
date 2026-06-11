@@ -4,6 +4,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import { prisma } from './prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { phoneSchema, otpSchema } from './validations'
+import { verifyAndConsumeOTP } from './otp'
 
 // Extend the session type
 declare module 'next-auth' {
@@ -75,10 +76,13 @@ export const authOptions: NextAuthOptions = {
         }
 
         const phoneNumber = validatedPhone.data.phone
+        const otpCode = validatedOTP.data.otp
 
-        // Here you would verify the OTP
-        // For now, this is a placeholder
-        // In real implementation, you'd call your OTP verification service
+        // Verify OTP
+        const otpResult = await verifyAndConsumeOTP(phoneNumber, otpCode)
+        if (!otpResult.valid) {
+          throw new Error(otpResult.error || 'Invalid OTP')
+        }
 
         try {
           // Find or create user by phone number

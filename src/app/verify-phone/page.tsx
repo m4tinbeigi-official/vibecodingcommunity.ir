@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
 import axios from 'axios'
@@ -64,10 +65,23 @@ export default function VerifyPhonePage() {
 
       if (response.data.success) {
         setSuccess(true)
-        // Redirect to dashboard after successful verification
+        // Sign in with NextAuth after successful OTP verification
+        const result = await signIn('phone-otp', {
+          phone: phoneNumber,
+          otp: otp,
+          redirect: false
+        })
+
+        if (result?.error) {
+          setError('خطا در ورود به حساب')
+          setSuccess(false)
+          return
+        }
+
+        // Redirect to dashboard after successful login
         setTimeout(() => {
           router.push('/dashboard')
-        }, 2000)
+        }, 1000)
       } else {
         setError(response.data.message || 'کد تایید اشتباه است')
       }

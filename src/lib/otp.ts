@@ -123,7 +123,7 @@ export async function verifyAndConsumeOTP(
   }
 
   // Check expiration
-  if (isBefore(new Date(), otpRecord.expiresAt)) {
+  if (!isBefore(new Date(), otpRecord.expiresAt)) {
     return { valid: false, error: 'کد تایید منقضی شده است' }
   }
 
