@@ -133,6 +133,11 @@ export async function awardPoints(
 
   if (!user) return;
 
+  if (user.suspended) {
+    console.log(`Skipping points for suspended user ${userId}`);
+    return;
+  }
+
   const newPoints = user.points + points;
   const newLevel = calculateLevel(newPoints);
 
@@ -191,11 +196,11 @@ export async function checkAndAwardBadges(userId: string, points: number) {
 
   const existingBadgeIds = user.badges.map((ub) => ub.badgeId);
 
+  // Get all badges once to avoid duplicate queries
+  const allBadges = await prisma.badge.findMany();
+
   for (const badgeConfig of BADGES) {
-    // Skip if already has this badge
-    const existingBadge = await prisma.badge.findUnique({
-      where: { slug: badgeConfig.slug },
-    });
+    const existingBadge = allBadges.find(b => b.slug === badgeConfig.slug);
 
     if (!existingBadge) continue;
     if (existingBadgeIds.includes(existingBadge.id)) continue;
@@ -247,13 +252,20 @@ export async function checkAndAwardBadges(userId: string, points: number) {
       if (speakingEvents >= 1) qualifies = true;
     }
 
-    // Award badge if qualifies
+    // Award badge if qualifies - use upsert to prevent duplicates
     if (qualifies) {
-      await prisma.userBadge.create({
-        data: {
+      await prisma.userBadge.upsert({
+        where: {
+          userId_badgeId: {
+            userId,
+            badgeId: existingBadge.id,
+          },
+        },
+        create: {
           userId,
           badgeId: existingBadge.id,
         },
+        update: {}, // Do nothing if already exists
       });
     }
   }
