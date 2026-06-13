@@ -6,107 +6,74 @@ export async function GET(request: Request) {
   try {
     await requireAdmin();
 
-    const { searchParams } = new URL(request.url);
-    const period = searchParams.get("period") || "30"; // days
-
-    const startDate = new Date(Date.now() - parseInt(period) * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // Get various analytics data
     const [
-      userGrowth,
-      projectGrowth,
-      challengeStats,
-      eventStats,
-      resourceStats,
-      topUsers,
-      activityLogs,
+      thisMonthUsers,
+      lastMonthUsers,
+      totalUsers,
+      thisMonthProjects,
+      lastMonthProjects,
+      totalProjects,
+      totalActivities,
+      totalPointsAwarded,
+      totalBadgesAwarded,
+      adminActionsCount,
+      userLevelDistribution,
+      recentActivities,
     ] = await Promise.all([
-      // User growth over time
-      prisma.user.groupBy({
-        by: ["createdAt"],
-        where: {
-          createdAt: { gte: startDate },
-        },
-        _count: true,
+      // User growth
+      prisma.user.count({
+        where: { createdAt: { gte: thisMonthStart } },
       }),
-
-      // Project growth over time
-      prisma.project.groupBy({
-        by: ["createdAt"],
+      prisma.user.count({
         where: {
-          createdAt: { gte: startDate },
-        },
-        _count: true,
-      }),
-
-      // Challenge statistics
-      prisma.challenge.findMany({
-        where: {
-          createdAt: { gte: startDate },
-        },
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          submissions: {
-            select: {
-              id: true,
-            },
+          createdAt: {
+            gte: lastMonthStart,
+            lte: lastMonthEnd,
           },
         },
       }),
+      prisma.user.count(),
 
-      // Event statistics
-      prisma.event.findMany({
+      // Project growth
+      prisma.project.count({
+        where: { createdAt: { gte: thisMonthStart } },
+      }),
+      prisma.project.count({
         where: {
-          createdAt: { gte: startDate },
-        },
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          registrations: {
-            select: {
-              id: true,
-            },
+          createdAt: {
+            gte: lastMonthStart,
+            lte: lastMonthEnd,
           },
         },
       }),
+      prisma.project.count(),
 
-      // Resource statistics
-      prisma.resource.findMany({
-        where: {
-          createdAt: { gte: startDate },
-        },
-        select: {
-          id: true,
-          type: true,
-          title: true,
-          createdAt: true,
-        },
-      }),
+      // Activity stats
+      prisma.activityLog.count(),
+      prisma.activityLog.aggregate({ _sum: { points: true } }),
+      prisma.userBadge.count(),
 
-      // Top users by points
-      prisma.user.findMany({
-        take: 20,
-        orderBy: {
-          points: "desc",
-        },
-        select: {
-          id: true,
-          username: true,
-          displayName: true,
-          avatarUrl: true,
-          points: true,
-          level: true,
-        },
-      }),
+      // Admin actions
+      prisma.adminActionLog.count(),
 
-      // Recent activity
+      // Level distribution
+      prisma.$queryRaw`
+        SELECT level, COUNT(*) as count
+        FROM "User"
+        GROUP BY level
+        ORDER BY level
+      `,
+
+      // Recent activities
       prisma.activityLog.findMany({
-        where: {
-          createdAt: { gte: startDate },
-        },
+        take: 20,
+        orderBy: { createdAt: "desc" },
         include: {
           user: {
             select: {
@@ -117,21 +84,52 @@ export async function GET(request: Request) {
             },
           },
         },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 100,
       }),
     ]);
 
+    // Format level names
+    const levelNames: Record<number, string> = {
+      1: "تازه‌وارد",
+      2: "سازنده",
+      3: "دموکننده",
+      4: "فعال جامعه",
+      5: "منتور",
+      6: "لیدر جامعه",
+    };
+
+    const levelDistribution = (userLevelDistribution as any[]).map((lvl) => ({
+      level: lvl.level,
+      name: levelNames[lvl.level] || `سطح ${lvl.level}`,
+      count: parseInt(lvl.count),
+    }));
+
+    // Get admin action breakdown
+    const [userUpdates, projectUpdates] = await Promise.all([
+      prisma.adminActionLog.count({ where: { targetType: "user" } }),
+      prisma.adminActionLog.count({ where: { targetType: "project" } }),
+    ]);
+
     return NextResponse.json({
-      userGrowth,
-      projectGrowth,
-      challengeStats,
-      eventStats,
-      resourceStats,
-      topUsers,
-      activityLogs,
+      userGrowth: {
+        thisMonth: thisMonthUsers,
+        lastMonth: lastMonthUsers,
+        total: totalUsers,
+      },
+      projectGrowth: {
+        thisMonth: thisMonthProjects,
+        lastMonth: lastMonthProjects,
+        total: totalProjects,
+      },
+      activityStats: {
+        totalActivities,
+        totalPointsAwarded: totalPointsAwarded._sum.points || 0,
+        totalBadgesAwarded,
+        adminActions: adminActionsCount,
+        userUpdates,
+        projectUpdates,
+      },
+      levelDistribution,
+      recentActivities,
     });
   } catch (error) {
     console.error("Error fetching analytics:", error);

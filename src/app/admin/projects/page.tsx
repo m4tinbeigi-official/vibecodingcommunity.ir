@@ -6,9 +6,9 @@ import DashboardLayout from "@/components/admin/DashboardLayout";
 
 export default function AdminProjects() {
   const router = useRouter();
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function AdminProjects() {
                     </td>
                   </tr>
                 ) : (
-                  projects.map((project) => (
+                  projects.map((project: any) => (
                     <tr key={project.id}>
                       <td className="px-6 py-4">
                         <div className="flex items-center">

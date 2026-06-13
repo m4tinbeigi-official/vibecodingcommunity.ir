@@ -68,6 +68,42 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const session = await requireAdmin();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "id is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const result = await updateResource(id, body);
+
+    // Log admin action
+    await logAdminAction(
+      // @ts-ignore
+      session.user.id,
+      "update",
+      "resource",
+      id,
+      body
+    );
+
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
+    console.error("Error updating resource:", error);
+    return NextResponse.json(
+      { error: "Failed to update resource" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request: Request) {
   try {
     const session = await requireAdmin();

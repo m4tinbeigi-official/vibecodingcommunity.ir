@@ -57,6 +57,42 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const session = await requireAdmin();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "id is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const result = await updateEvent(id, body);
+
+    // Log admin action
+    await logAdminAction(
+      // @ts-ignore
+      session.user.id,
+      "update",
+      "event",
+      id,
+      body
+    );
+
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    return NextResponse.json(
+      { error: "Failed to update event" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request: Request) {
   try {
     const session = await requireAdmin();

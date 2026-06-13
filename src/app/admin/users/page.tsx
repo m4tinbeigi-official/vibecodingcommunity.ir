@@ -6,13 +6,13 @@ import DashboardLayout from "@/components/admin/DashboardLayout";
 
 export default function AdminUsers() {
   const router = useRouter();
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function AdminUsers() {
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(
-        (user) =>
+        (user: any) =>
           user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.email?.toLowerCase().includes(searchQuery.toLowerCase())

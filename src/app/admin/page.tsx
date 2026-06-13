@@ -4,11 +4,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 
+interface DashboardData {
+  stats: any;
+  latestUsers: any[];
+  latestProjects: any[];
+  topMembers: any[];
+  mostUpvoted: any[];
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -24,7 +32,7 @@ export default function AdminDashboard() {
         const result = await response.json();
         setData(result);
       } catch (err) {
-        setError(err.message);
+        setError((err as Error).message || "Failed to fetch dashboard data");
       } finally {
         setLoading(false);
       }
@@ -56,7 +64,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const { stats, latestUsers, latestProjects, topMembers, mostUpvoted } = data;
+  const { stats, latestUsers, latestProjects, topMembers, mostUpvoted } = data!;
 
   return (
     <DashboardLayout>
@@ -163,7 +171,7 @@ export default function AdminDashboard() {
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {latestUsers.slice(0, 5).map((user) => (
+                {latestUsers.slice(0, 5).map((user: any) => (
                   <div key={user.id} className="flex items-center">
                     <img
                       src={user.avatarUrl || "/default-avatar.png"}
@@ -197,7 +205,7 @@ export default function AdminDashboard() {
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {latestProjects.slice(0, 5).map((project) => (
+                {latestProjects.slice(0, 5).map((project: any) => (
                   <div key={project.id} className="flex items-center">
                     <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center">
                       <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +234,7 @@ export default function AdminDashboard() {
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {topMembers.slice(0, 5).map((member, index) => (
+                {topMembers.slice(0, 5).map((member: any, index: number) => (
                   <div key={member.id} className="flex items-center">
                     <div className="w-8 text-center font-bold text-gray-400">
                       #{index + 1}
@@ -256,7 +264,7 @@ export default function AdminDashboard() {
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {mostUpvoted.slice(0, 5).map((project, index) => (
+                {mostUpvoted.slice(0, 5).map((project: any, index: number) => (
                   <div key={project.id} className="flex items-center">
                     <div className="w-8 text-center font-bold text-gray-400">
                       #{index + 1}
