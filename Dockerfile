@@ -1,41 +1,24 @@
-# Multi-stage build for Next.js
-FROM node:20-alpine AS deps
+# Production image - use pre-built Next.js
+FROM node:20-slim
 
-WORKDIR /app
-
-# Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-# Rebuild the source code only when needed
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build Next.js
-ENV NEXT_TELEMETRY_DISABLED 1
-RUN npm run build
-
-# Production image, copy all the files and run next
-FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Install dependencies
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+RUN npm install --omit=dev
+
+# Copy pre-built Next.js files
+COPY .next/standalone ./
+COPY .next/static ./.next/static
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/prisma ./prisma
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
