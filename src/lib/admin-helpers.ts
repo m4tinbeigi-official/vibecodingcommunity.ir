@@ -357,3 +357,111 @@ export async function getRecentAdminActions(limit = 20) {
     },
   });
 }
+
+// Award points to event participants
+export async function awardEventParticipants(
+  eventId: string,
+  participantType: 'all' | 'registered' | 'attended' | 'speakers',
+  points?: number
+) {
+  // Get event details
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      registrations: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              suspended: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!event) {
+    throw new Error('رویداد یافت نشد');
+  }
+
+  let userIds: string[] = [];
+  const { bulkAwardPoints } = await import('./gamification');
+
+  // Filter users based on participant type
+  for (const registration of event.registrations) {
+    if (registration.user.suspended) continue;
+
+    switch (participantType) {
+      case 'all':
+        userIds.push(registration.userId);
+        break;
+      case 'registered':
+        userIds.push(registration.userId);
+        break;
+      case 'attended':
+        // @ts-ignore
+        if (registration.attended) {
+          userIds.push(registration.userId);
+        }
+        break;
+      case 'speakers':
+        // @ts-ignore
+        if (registration.isSpeaker) {
+          userIds.push(registration.userId);
+        }
+        break;
+    }
+  }
+
+  if (userIds.length === 0) {
+    return {
+      success: 0,
+      failed: 0,
+      message: 'هیچ کاربری یافت نشد'
+    };
+  }
+
+  // Determine points based on participant type
+  let pointsToAward = points;
+  if (!pointsToAward) {
+    const { POINTS } = await import('./gamification');
+    switch (participantType) {
+      case 'all':
+      case 'registered':
+        pointsToAward = POINTS.REGISTER_EVENT || 20;
+        break;
+      case 'attended':
+        pointsToAward = POINTS.ATTEND_EVENT || 50;
+        break;
+      case 'speakers':
+        pointsToAward = POINTS.SPEAK_EVENT || 200;
+        break;
+    }
+  }
+
+  // Award points to all users
+  const actionName = `event_${participantType}`;
+  const results = await bulkAwardPoints(
+    userIds,
+    actionName,
+    pointsToAward,
+    { eventId, eventTitle: event.title, participantType }
+  );
+
+  return {
+    ...results,
+    message: `امتیاز ${pointsToAward} به ${results.success} کاربر awarded شد`
+  };
+}
+
+// Award points to users by phone numbers (manual list)
+export async function awardPointsByPhoneNumbers(
+  phoneNumbers: string[],
+  action: string,
+  points: number,
+  metadata?: any
+) {
+  const { awardPointsByPhoneNumbers: awardByPhone } = await import('./gamification');
+  return await awardByPhone(phoneNumbers, action, points, metadata);
+}

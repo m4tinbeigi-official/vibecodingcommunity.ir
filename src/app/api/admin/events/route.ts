@@ -5,6 +5,8 @@ import {
   updateEvent,
   closeEventRegistration,
   logAdminAction,
+  awardEventParticipants,
+  awardPointsByPhoneNumbers,
 } from "@/lib/admin-helpers";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -114,6 +116,14 @@ export async function PATCH(request: Request) {
         break;
       case "close":
         result = await closeEventRegistration(eventId);
+        break;
+      case "award":
+        const { participantType, points } = data;
+        result = await awardEventParticipants(eventId, participantType, points);
+        break;
+      case "award_manual":
+        const { phoneNumbers, points: manualPoints, action: actionName } = data;
+        result = await awardPointsByPhoneNumbers(phoneNumbers, actionName, manualPoints, { eventId });
         break;
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

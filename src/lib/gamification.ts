@@ -8,6 +8,7 @@ export const POINTS = {
   ADD_FIRST_PROJECT: 100,
   JOIN_CHALLENGE: 80,
   WIN_CHALLENGE: 300,
+  REGISTER_EVENT: 20, // جدید: برای ثبت‌نام در رویداد
   ATTEND_EVENT: 50,
   SPEAK_EVENT: 200,
   PROJECT_UPVOTE: 10,
@@ -288,4 +289,74 @@ export async function initializeBadges() {
       },
     });
   }
+}
+
+// Bulk award points to multiple users (for event participants)
+export async function bulkAwardPoints(
+  userIds: string[],
+  action: string,
+  points: number,
+  metadata?: any
+) {
+  const results = {
+    success: 0,
+    failed: 0,
+    errors: [] as string[],
+  };
+
+  for (const userId of userIds) {
+    try {
+      await awardPoints(userId, action, points, metadata);
+      results.success++;
+    } catch (error) {
+      results.failed++;
+      results.errors.push(`User ${userId}: ${error}`);
+    }
+  }
+
+  return results;
+}
+
+// Award points to users by phone numbers (manual list)
+export async function awardPointsByPhoneNumbers(
+  phoneNumbers: string[],
+  action: string,
+  points: number,
+  metadata?: any
+) {
+  const results = {
+    success: 0,
+    failed: 0,
+    notFound: [] as string[],
+    errors: [] as string[],
+  };
+
+  for (const phone of phoneNumbers) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { phone },
+        select: { id: true, suspended: true },
+      });
+
+      if (!user) {
+        results.notFound.push(phone);
+        results.failed++;
+        continue;
+      }
+
+      if (user.suspended) {
+        results.failed++;
+        results.errors.push(`User ${phone} is suspended`);
+        continue;
+      }
+
+      await awardPoints(user.id, action, points, { ...metadata, phone });
+      results.success++;
+    } catch (error) {
+      results.failed++;
+      results.errors.push(`Phone ${phone}: ${error}`);
+    }
+  }
+
+  return results;
 }
