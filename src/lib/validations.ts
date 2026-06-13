@@ -228,3 +228,87 @@ export const PROJECT_STATUSES = [
 ] as const
 
 export type ProjectInput = z.infer<typeof projectSchema>
+
+// Challenge validation schemas
+export const challengeSchema = z.object({
+  title: z.string().min(3, 'عنوان باید حداقل 3 حرف باشد').max(100, 'عنوان باید حداکثر 100 حرف باشد'),
+  shortDescription: z.string().min(10, 'توضیح کوتاه باید حداقل 10 حرف باشد').max(200, 'توضیح کوتاه باید حداکثر 200 حرف باشد'),
+  fullDescription: z.string().min(20, 'توضیح کامل باید حداقل 20 حرف باشد').max(5000, 'توضیح کامل باید حداکثر 5000 حرف باشد'),
+  rules: z.string().max(2000, 'قوانین باید حداکثر 2000 حرف باشد').optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'فرمت تاریخ نامعتبر است'),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'فرمت تاریخ نامعتبر است'),
+  pointsReward: z.number().int().min(0, 'امتیاز باید عدد مثبت باشد'),
+  prize: z.string().max(200, 'جایزه باید حداکثر 200 حرف باشد').optional(),
+  status: z.enum(['upcoming', 'active', 'completed'], {
+    errorMap: () => ({ message: 'وضعیت نامعتبر است' })
+  }),
+})
+
+export const CHALLENGE_STATUSES = [
+  { value: 'upcoming', label: 'در انتظار' },
+  { value: 'active', label: 'فعال' },
+  { value: 'completed', label: 'تکمیل شده' },
+] as const
+
+export const challengeSubmissionSchema = z.object({
+  projectId: z.string().min(1, 'پروژه الزامی است'),
+  note: z.string().max(500, 'یادداشت باید حداکثر 500 حرف باشد').optional(),
+})
+
+export type ChallengeInput = z.infer<typeof challengeSchema>
+export type ChallengeSubmissionInput = z.infer<typeof challengeSubmissionSchema>
+
+// Event validation schemas
+export const eventSchema = z.object({
+  title: z.string().min(3, 'عنوان باید حداقل 3 حرف باشد').max(100, 'عنوان باید حداکثر 100 حرف باشد'),
+  description: z.string().min(20, 'توضیح باید حداقل 20 حرف باشد').max(5000, 'توضیح باید حداکثر 5000 حرف باشد'),
+  type: z.enum(['online', 'in_person'], {
+    errorMap: () => ({ message: 'نوع رویداد نامعتبر است' })
+  }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'فرمت تاریخ نامعتبر است'),
+  time: z.string().regex(/^\d{2}:\d{2}$/, 'فرمت زمان نامعتبر است'),
+  location: z.string().max(200, 'مکان باید حداکثر 200 حرف باشد').optional(),
+  onlineUrl: z.string().url('آدرس آنلاین نامعتبر است').optional().or(z.literal('')),
+  speakers: z.array(z.string()).default([]),
+  topics: z.array(z.string()).default([]),
+  capacity: z.number().int().positive('ظرفیت باید عدد مثبت باشد').optional(),
+  status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled'], {
+    errorMap: () => ({ message: 'وضعیت نامعتبر است' })
+  }),
+})
+
+export const EVENT_TYPES = [
+  { value: 'online', label: 'آنلاین' },
+  { value: 'in_person', label: 'حضوری' },
+] as const
+
+export const EVENT_STATUSES = [
+  { value: 'upcoming', label: 'در انتظار' },
+  { value: 'ongoing', label: 'در حال برگزاری' },
+  { value: 'completed', label: 'تکمیل شده' },
+  { value: 'cancelled', label: 'لغو شده' },
+] as const
+
+export type EventInput = z.infer<typeof eventSchema>
+
+// Resource validation schemas
+export const resourceSchema = z.object({
+  title: z.string().min(3, 'عنوان باید حداقل 3 حرف باشد').max(100, 'عنوان باید حداکثر 100 حرف باشد'),
+  content: z.string().min(20, 'محتوا باید حداقل 20 حرف باشد').max(10000, 'محتوا باید حداکثر 10000 حرف باشد'),
+  type: z.enum(['prompt', 'ai_tool', 'mvp_checklist', 'tutorial', 'experience', 'beginner'], {
+    errorMap: () => ({ message: 'نوع منبع نامعتبر است' })
+  }),
+  description: z.string().max(500, 'توضیح باید حداکثر 500 حرف باشد').optional(),
+  tags: z.array(z.string()).default([]),
+})
+
+export const RESOURCE_TYPES = [
+  { value: 'prompt', label: 'پرامپت' },
+  { value: 'ai_tool', label: 'ابزار هوش مصنوعی' },
+  { value: 'mvp_checklist', label: 'چک‌لیست MVP' },
+  { value: 'tutorial', label: 'آموزش' },
+  { value: 'experience', label: 'تجربه عضو' },
+  { value: 'beginner', label: 'منبع مبتدی' },
+] as const
+
+export type ResourceInput = z.infer<typeof resourceSchema>

@@ -64,6 +64,106 @@ model User {
   sessions        Session[]
   projects        Project[]
   upvotes         ProjectUpvote[]
+  challengeSubmissions ChallengeSubmission[]
+  eventRegistrations EventRegistration[]
+  resources       Resource[]
+}
+
+// Challenge model
+model Challenge {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  shortDescription String
+  fullDescription String   @db.Text
+  rules           String?  @db.Text
+  startDate       DateTime
+  endDate         DateTime
+  pointsReward    Int      @default(0)
+  prize           String?
+  status          String   // upcoming, active, completed
+  submissions     ChallengeSubmission[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+// Challenge Submission model
+model ChallengeSubmission {
+  id          String   @id @default(cuid())
+  challengeId String
+  projectId   String
+  userId      String
+  note        String?  @db.Text
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submittedAt DateTime @default(now())
+
+  @@unique([challengeId, userId, projectId])
+  @@index([challengeId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// Event model
+model Event {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  description     String   @db.Text
+  type            String   // online, in_person
+  date            DateTime
+  time            String
+  location        String?
+  onlineUrl       String?
+  speakers        String[] @default([])
+  topics          String[] @default([])
+  capacity        Int?
+  status          String   // upcoming, ongoing, completed, cancelled
+  registrations   EventRegistration[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([date])
+  @@index([type])
+}
+
+// Event Registration model
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registeredAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+// Resource model
+model Resource {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  content     String   @db.Text
+  type        String   // prompt, ai_tool, mvp_checklist, tutorial, experience, beginner
+  description String?
+  tags        String[] @default([])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 // Project model
@@ -90,6 +190,7 @@ model Project {
   ownerId           String
   owner             User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   upvotes           ProjectUpvote[]
+  challengeSubmissions ChallengeSubmission[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
