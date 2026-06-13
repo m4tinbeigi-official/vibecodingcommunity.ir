@@ -17,7 +17,9 @@ model User {
   phone           String?   @unique
   emailVerified   DateTime?
   image           String?   // Legacy avatar field
-  role            String    @default("user")
+  role            String    @default("user") // user, admin
+  suspended       Boolean   @default(false)
+  featured        Boolean   @default(false) // Featured member
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -56,7 +58,7 @@ model User {
   onboardingCompleted Boolean @default(false)
   onboardingStep   Int       @default(1)
 
-  // Gamification (placeholder)
+  // Gamification
   points          Int       @default(0)
   level           Int       @default(1)
 
@@ -67,6 +69,9 @@ model User {
   challengeSubmissions ChallengeSubmission[]
   eventRegistrations EventRegistration[]
   resources       Resource[]
+  badges          UserBadge[]
+  activityLogs     ActivityLog[]
+  adminActions    AdminActionLog[] @relation("AdminActions")
 }
 
 // Challenge model
@@ -276,4 +281,68 @@ model RateLimit {
 
   @@unique([identifier, action, windowStart])
   @@index([identifier, action])
+}
+
+// Badge model
+model Badge {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   // Display name in Persian
+  nameEn      String   // English name for reference
+  description String?  @db.Text
+  icon        String?  // Icon name or emoji
+  requiredPoints Int    @default(0)
+  category    String   // achievement, skill, community
+  createdAt   DateTime @default(now())
+
+  users       UserBadge[]
+
+  @@index([category])
+  @@index([requiredPoints])
+}
+
+// User Badge model ( junction table )
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeId     String
+  awardedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}
+
+// Activity Log model
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // project_created, challenge_joined, etc.
+  points      Int      @default(0)
+  metadata    Json?    // Additional data
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// Admin Action Log model
+model AdminActionLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String   // user_suspended, project_featured, etc.
+  targetType  String   // user, project, challenge, etc.
+  targetId    String
+  metadata    Json?    // Additional data
+  createdAt   DateTime @default(now())
+  admin       User     @relation("AdminActions", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetType])
+  @@index([createdAt])
 }
