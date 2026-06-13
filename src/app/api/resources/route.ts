@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET /api/resources - Get resources list
@@ -59,7 +61,38 @@ export async function GET(request: NextRequest) {
 // POST /api/resources - Create new resource
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
+
+    // Validate with Zod (basic validation)
+    if (!body.title || body.title.length < 3) {
+      return NextResponse.json(
+        { error: 'عنوان باید حداقل 3 حرف باشد' },
+        { status: 400 }
+      )
+    }
+
+    if (!body.content || body.content.length < 20) {
+      return NextResponse.json(
+        { error: 'محتوا باید حداقل 20 حرف باشد' },
+        { status: 400 }
+      )
+    }
+
+    if (!body.type || !['prompt', 'ai_tool', 'mvp_checklist', 'tutorial', 'experience', 'beginner'].includes(body.type)) {
+      return NextResponse.json(
+        { error: 'نوع منبع نامعتبر است' },
+        { status: 400 }
+      )
+    }
 
     // Generate slug from title
     const slug = body.title
@@ -74,9 +107,9 @@ export async function POST(request: NextRequest) {
         title: body.title,
         content: body.content,
         type: body.type,
-        description: body.description,
-        tags: body.tags,
-        authorId: body.authorId,
+        description: body.description || null,
+        tags: body.tags || [],
+        authorId: session.user.id,
       }
     })
 
