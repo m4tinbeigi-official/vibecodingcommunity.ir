@@ -1,0 +1,15 @@
+# Robots.txt for Vibe Coding Community
+# https://www.vibecommunity.com
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /onboarding/
+
+# Sitemap
+Sitemap: https://www.vibecommunity.com/sitemap.xml
