@@ -6,7 +6,7 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Install dependencies
+# Install dependencies only (no build)
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
 RUN npm install --omit=dev
