@@ -4,7 +4,17 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Mail, Smartphone, Loader2 } from 'lucide-react'
+import { Mail, Smartphone, Loader2, Send } from 'lucide-react'
+
+declare global {
+  interface Window {
+    Telegram?: {
+      Login: {
+        auth: (callback: (data: any) => void, request: any) => void
+      }
+    }
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,6 +31,55 @@ export default function LoginPage() {
       setError('خطا در ورود با گوگل')
       console.error(error)
     } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleTelegramLogin = () => {
+    try {
+      setLoading(true)
+      setError('')
+
+      if (typeof window !== 'undefined' && window.Telegram?.Login?.auth) {
+        window.Telegram.Login.auth(
+          (data: any) => {
+            if (data) {
+              signIn('telegram', {
+                callbackUrl: '/dashboard',
+                authData: JSON.stringify(data)
+              }).catch((err) => {
+                setError('خطا در ورود با تلگرام')
+                console.error(err)
+                setLoading(false)
+              })
+            } else {
+              setError('خطا در احراز هویت تلگرام')
+              setLoading(false)
+            }
+          },
+          { request_access: false }
+        )
+      } else {
+        // Fallback: Create a form and submit
+        const script = document.createElement('script')
+        script.src = 'https://telegram.org/js/telegram-widget.js?22'
+        script.setAttribute('data-telegram-login', 'vibe_coding_bot')
+        script.setAttribute('data-size', 'large')
+        script.setAttribute('data-request-access', 'write')
+        script.async = true
+
+        script.onload = () => {
+          setError('لطفاً روی دکمه تلگرام کلیک کنید')
+          setLoading(false)
+        }
+
+        document.body.appendChild(script)
+        setError('در حال بارگذاری دکمه تلگرام...')
+        setLoading(false)
+      }
+    } catch (error) {
+      setError('خطا در ورود با تلگرام')
+      console.error(error)
       setLoading(false)
     }
   }
@@ -66,6 +125,20 @@ export default function LoginPage() {
               <span className="font-medium text-gray-900 dark:text-white">
                 ورود با گوگل
               </span>
+            </button>
+
+            {/* Telegram Login */}
+            <button
+              onClick={handleTelegramLogin}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+              <span className="font-medium">ورود با تلگرام</span>
             </button>
 
             {/* Divider */}

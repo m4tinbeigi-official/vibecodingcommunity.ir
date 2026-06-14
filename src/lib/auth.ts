@@ -5,6 +5,32 @@ import { prisma } from './prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { phoneSchema, otpSchema } from './validations'
 import { verifyAndConsumeOTP } from './otp'
+import * as crypto from 'crypto'
+
+// Telegram Login Widget verification
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
+
+function checkTelegramAuthData(authData: any): boolean {
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.error('TELEGRAM_BOT_TOKEN is not set')
+    return false
+  }
+
+  const { hash, ...data } = authData
+  if (!hash) return false
+
+  // Create data check string
+  const dataCheckString = Object.keys(data)
+    .sort()
+    .map(key => `${key}=${data[key]}`)
+    .join('\n')
+
+  // Calculate hash
+  const secretKey = crypto.createHash('sha256').update(TELEGRAM_BOT_TOKEN).digest()
+  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+
+  return calculatedHash === hash
+}
 
 // Extend the session type
 declare module 'next-auth' {
@@ -31,6 +57,8 @@ declare module 'next-auth/jwt' {
     id: string
     phone?: string | null
     role: string
+    username?: string | null
+    displayName?: string | null
   }
 }
 
@@ -47,6 +75,83 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    }),
+    CredentialsProvider({
+      id: 'telegram',
+      name: 'Telegram',
+      credentials: {
+        authData: { label: 'Telegram Auth Data', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.authData) {
+          throw new Error('Telegram auth data is required')
+        }
+
+        try {
+          const authData = JSON.parse(credentials.authData as string)
+
+          // Verify Telegram auth data
+          if (!checkTelegramAuthData(authData)) {
+            throw new Error('Invalid Telegram auth data')
+          }
+
+          // Extract user info
+          const telegramId = authData.id?.toString()
+          const firstName = authData.first_name || ''
+          const lastName = authData.last_name || ''
+          const username = authData.username || ''
+          const photoUrl = authData.photo_url || ''
+
+          if (!telegramId) {
+            throw new Error('Invalid Telegram user data')
+          }
+
+          // Check if user exists by telegram ID
+          let user = await prisma.user.findFirst({
+            where: {
+              email: `telegram_${telegramId}@telegram.local`
+            }
+          })
+
+          if (!user) {
+            // Create new user from Telegram data
+            const fullName = [firstName, lastName].filter(Boolean).join(' ')
+            const displayName = username || fullName || firstName
+
+            user = await prisma.user.create({
+              data: {
+                email: `telegram_${telegramId}@telegram.local`,
+                name: fullName || firstName,
+                firstName: firstName || null,
+                lastName: lastName || null,
+                displayName: displayName,
+                username: username || null,
+                avatarUrl: photoUrl || null,
+                emailVerified: new Date(),
+              }
+            })
+          } else {
+            // Update existing user info
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                avatarUrl: photoUrl || user.avatarUrl,
+              }
+            })
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error('Error in Telegram authorization:', error)
+          throw new Error('Telegram authentication failed')
+        }
+      },
     }),
     CredentialsProvider({
       id: 'phone-otp',
@@ -121,6 +226,15 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.phone = user.phone
         token.role = user.role
+        // Fetch user data to get username and displayName
+        const userData = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { username: true, displayName: true }
+        })
+        if (userData) {
+          token.username = userData.username
+          token.displayName = userData.displayName
+        }
       }
       return token
     },
