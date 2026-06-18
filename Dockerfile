@@ -6,6 +6,10 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Prisma query engine needs OpenSSL at generate-time and runtime
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies only (no build)
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
