@@ -73,7 +73,7 @@ export class SMSirService {
       ]
     }
 
-    return await this.sendRequest('/send/lookup', payload)
+    return await this.sendRequest('/send/verify', payload)
   }
 
   // In production, you might want to add more methods like:
