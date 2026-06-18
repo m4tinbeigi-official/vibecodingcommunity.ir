@@ -3,20 +3,20 @@ import { Providers } from './providers'
 import { ReactNode } from 'react'
 
 export const metadata = {
-  title: 'انجمن برنامه‌نویسی وایب | Vibe Coding Community',
+  title: 'انجمن وایب کدینگ ایران',
   description: 'جایی برای برنامه‌نویسان که یاد بگیرند، پروژه بسازند و با هم رشد کنند. یادگیری عملی، چالش‌های کدنویسی، و ارتباط با دیگر برنامه‌نویسان.',
   keywords: ['انجمن برنامه‌نویسی', 'برنامه‌نویسی', 'کدنویسی', 'یادگیری برنامه‌نویسی', 'چالش کدنویسی', 'پروژه برنامه‌نویسی', 'Vibe', 'وایب'],
-  authors: [{ name: 'Vibe Coding Community' }],
+  authors: [{ name: 'انجمن وایب کدینگ ایران' }],
   openGraph: {
-    title: 'انجمن برنامه‌نویسی وایب | Vibe Coding Community',
+    title: 'انجمن وایب کدینگ ایران',
     description: 'جایی برای برنامه‌نویسان که یاد بگیرند، پروژه بسازند و با هم رشد کنند.',
     type: 'website',
     locale: 'fa_IR',
-    siteName: 'Vibe Coding Community',
+    siteName: 'انجمن وایب کدینگ ایران',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'انجمن برنامه‌نویسی وایب | Vibe Coding Community',
+    title: 'انجمن وایب کدینگ ایران',
     description: 'جایی برای برنامه‌نویسان که یاد بگیرند، پروژه بسازند و با هم رشد کنند.',
   },
   robots: {

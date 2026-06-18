@@ -45,7 +45,7 @@ export default function Home() {
         <div className="space-y-6">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
-              انجمن برنامه‌نویسی وایب
+              انجمن وایب کدینگ ایران
             </h1>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
               جایی برای برنامه‌نویسان که یاد بگیرند، پروژه بسازند و با هم رشد کنند

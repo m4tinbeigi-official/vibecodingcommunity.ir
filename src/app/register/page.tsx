@@ -98,7 +98,7 @@ export default function RegisterPage() {
               ایجاد حساب جدید
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              به انجمن برنامه‌نویسی وایب بپیوندید
+              به انجمن وایب کدینگ ایران بپیوندید
             </p>
           </div>
 

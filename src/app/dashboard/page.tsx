@@ -163,7 +163,7 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-sm p-6 text-white">
           <h2 className="text-2xl font-bold mb-2">
-            به انجمن برنامه‌نویسی وایب خوش آمدید!
+            به انجمن وایب کدینگ ایران خوش آمدید!
           </h2>
           <p className="text-primary-100 mb-4">
             اینجا می‌توانید با برنامه‌نویسان دیگر ارتباط برقرار کنید، پروژه‌های خود را به اشتراک بگذارید و مهارت‌های خود را تقویت کنید.

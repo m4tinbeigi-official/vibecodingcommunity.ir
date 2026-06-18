@@ -53,8 +53,8 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${user.displayName} (@${user.username}) | انجمن برنامه‌نویسی وایب`,
-    description: user.bio || `پروفایل ${user.displayName} در انجمن برنامه‌نویسی وایب`,
+    title: `${user.displayName} (@${user.username}) | انجمن وایب کدینگ ایران`,
+    description: user.bio || `پروفایل ${user.displayName} در انجمن وایب کدینگ ایران`,
   }
 }
 
