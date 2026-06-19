@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { Code2, Users, Rocket, Trophy, Zap, Target, Globe, MessageCircle } from 'lucide-react'
+import SiteHeader from '@/components/SiteHeader'
+import TelegramCommunity from '@/components/TelegramCommunity'
 
 const features = [
   {
@@ -59,7 +61,7 @@ const features = [
 ]
 
 const stats = [
-  { value: '500+', label: { en: 'Developers', fa: 'توسعه‌دهنده', ar: 'مطور' } },
+  { value: '700+', label: { en: 'Developers', fa: 'توسعه‌دهنده', ar: 'مطور' } },
   { value: '100+', label: { en: 'Projects', fa: 'پروژه', ar: 'مشروع' } },
   { value: '20+', label: { en: 'Challenges', fa: 'چالش', ar: 'تحدي' } },
   { value: '50+', label: { en: 'Resources', fa: 'منبع', ar: 'مورد' } }
@@ -72,8 +74,12 @@ export default function HomePage({ params }: { params: { lang: string } }) {
     return obj[params.lang] || obj.en
   }
 
+  const lang = (['fa', 'en', 'ar'].includes(params.lang) ? params.lang : 'fa') as 'fa' | 'en' | 'ar'
+
   return (
     <main className="min-h-screen">
+      <SiteHeader lang={lang} />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-pink-500/10" />
@@ -217,6 +223,9 @@ export default function HomePage({ params }: { params: { lang: string } }) {
           </Link>
         </div>
       </section>
+
+      {/* Telegram Community */}
+      <TelegramCommunity lang={lang} />
     </main>
   )
 }

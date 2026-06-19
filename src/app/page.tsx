@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import SiteHeader from '@/components/SiteHeader'
+import TelegramCommunity from '@/components/TelegramCommunity'
 
 interface HomeData {
   upcomingEvents: any[]
@@ -38,6 +40,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <SiteHeader lang="fa" />
+
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center min-h-[70vh] p-4 md:p-8">
         <div className="text-center space-y-8 max-w-4xl w-full">
@@ -72,7 +76,7 @@ export default function Home() {
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">+500</div>
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">+700</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">عضو فعال</div>
             </div>
             <div className="text-center">
@@ -168,6 +172,9 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Telegram Community */}
+      <TelegramCommunity lang="fa" />
 
       {/* Content Sections */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
