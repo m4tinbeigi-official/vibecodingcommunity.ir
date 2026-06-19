@@ -40,13 +40,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify OTP
-    const result = await verifyAndConsumeOTP(phoneNumber, otp)
-    if (!result.valid) {
-      return NextResponse.json(
-        { success: false, message: result.error || 'کد تایید اشتباه است' },
-        { status: 400 }
-      )
+    // Verify OTP. A master test code (TEST_OTP, default "1111") allows login
+    // without real SMS delivery — useful while the SMS template is unavailable.
+    // Must stay in sync with the phone-otp provider in src/lib/auth.ts.
+    // Disable by setting TEST_OTP="".
+    const TEST_OTP = process.env.TEST_OTP ?? '1111'
+    if (!(TEST_OTP && otp === TEST_OTP)) {
+      const result = await verifyAndConsumeOTP(phoneNumber, otp)
+      if (!result.valid) {
+        return NextResponse.json(
+          { success: false, message: result.error || 'کد تایید اشتباه است' },
+          { status: 400 }
+        )
+      }
     }
 
     // Find or create user
