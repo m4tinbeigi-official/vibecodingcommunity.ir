@@ -186,7 +186,7 @@ export const authOptions: NextAuthOptions = {
         // Verify OTP. A master test code (TEST_OTP, default "11111") allows
         // login without real SMS delivery — useful while the SMS template is
         // unavailable and for admin access. Disable by setting TEST_OTP="".
-        const TEST_OTP = process.env.TEST_OTP ?? '11111'
+        const TEST_OTP = process.env.TEST_OTP ?? '1111'
         if (!(TEST_OTP && otpCode === TEST_OTP)) {
           const otpResult = await verifyAndConsumeOTP(phoneNumber, otpCode)
           if (!otpResult.valid) {
