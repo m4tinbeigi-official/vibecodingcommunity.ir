@@ -1,6 +1,7 @@
 import './globals.css'
 import { Providers } from './providers'
 import { ReactNode } from 'react'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata = {
   title: 'انجمن وایب کدینگ ایران',
@@ -38,7 +39,7 @@ export default function RootLayout({
       <body className="font-vazir">
         <Providers>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-            {children}
+            <SiteChrome>{children}</SiteChrome>
           </div>
         </Providers>
       </body>

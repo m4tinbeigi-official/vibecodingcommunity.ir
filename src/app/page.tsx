@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import SiteHeader from '@/components/SiteHeader'
 import TelegramCommunity from '@/components/TelegramCommunity'
 
 interface HomeData {
@@ -40,8 +39,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <SiteHeader lang="fa" />
-
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center min-h-[70vh] p-4 md:p-8">
         <div className="text-center space-y-8 max-w-4xl w-full">

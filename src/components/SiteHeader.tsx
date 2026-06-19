@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 const TELEGRAM_GROUP = 'https://t.me/+NPQiEl2kUQ5jZTRk'
 const TELEGRAM_CHANNEL = 'https://t.me/vibecodersai'
@@ -13,6 +16,7 @@ const labels: Record<Lang, {
   group: string
   login: string
   register: string
+  dashboard: string
 }> = {
   fa: {
     brand: 'انجمن وایب کدینگ ایران',
@@ -22,6 +26,7 @@ const labels: Record<Lang, {
     group: 'گروه تلگرام',
     login: 'ورود',
     register: 'عضویت',
+    dashboard: 'داشبورد',
   },
   en: {
     brand: 'Vibe Coding Community',
@@ -31,6 +36,7 @@ const labels: Record<Lang, {
     group: 'Telegram Group',
     login: 'Login',
     register: 'Sign Up',
+    dashboard: 'Dashboard',
   },
   ar: {
     brand: 'مجتمع Vibe Coding',
@@ -40,11 +46,14 @@ const labels: Record<Lang, {
     group: 'مجموعة تلجرام',
     login: 'تسجيل الدخول',
     register: 'اشترك',
+    dashboard: 'لوحة التحكم',
   },
 }
 
 export default function SiteHeader({ lang = 'fa' }: { lang?: Lang }) {
   const t = labels[lang] || labels.fa
+  const { status } = useSession()
+  const isAuthed = status === 'authenticated'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -69,18 +78,29 @@ export default function SiteHeader({ lang = 'fa' }: { lang?: Lang }) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            {t.login}
-          </Link>
-          <Link
-            href="/register"
-            className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            {t.register}
-          </Link>
+          {isAuthed ? (
+            <Link
+              href="/dashboard"
+              className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              {t.dashboard}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t.login}
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                {t.register}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

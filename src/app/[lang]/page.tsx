@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Code2, Users, Rocket, Trophy, Zap, Target, Globe, MessageCircle } from 'lucide-react'
-import SiteHeader from '@/components/SiteHeader'
 import TelegramCommunity from '@/components/TelegramCommunity'
 
 const features = [
@@ -78,8 +77,6 @@ export default function HomePage({ params }: { params: { lang: string } }) {
 
   return (
     <main className="min-h-screen">
-      <SiteHeader lang={lang} />
-
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-pink-500/10" />
