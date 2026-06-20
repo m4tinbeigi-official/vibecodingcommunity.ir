@@ -31,23 +31,39 @@ export const googleAuthSchema = z.object({
   state: z.string().optional()
 })
 
+// Optional image URL: trims whitespace, treats blank as empty, validates real URL.
+// Tolerates pasted URLs with stray spaces (a common cause of false validation errors).
+const optionalImageUrl = (message: string) =>
+  z.preprocess(
+    (v) => (typeof v === 'string' ? v.trim() : v),
+    z.string().url(message).optional().or(z.literal(''))
+  )
+
+// Optional social field: a profile may paste a full link OR a handle (e.g. @user,
+// t.me/user). We only trim and keep it as plain text so handles don't fail validation.
+const optionalSocial = z.preprocess(
+  (v) => (typeof v === 'string' ? v.trim() : v),
+  z.string().max(300, 'آدرس بیش از حد طولانی است').optional().or(z.literal(''))
+)
+
 // Onboarding Step 1: Basic Info
 export const onboardingStep1Schema = z.object({
-  firstName: z.string().min(2, 'نام باید حداقل 2 حرف باشد'),
-  lastName: z.string().min(2, 'نام خانوادگی باید حداقل 2 حرف باشد'),
-  displayName: z.string().min(3, 'نام نمایشی باید حداقل 3 حرف باشد'),
+  firstName: z.string().trim().min(2, 'نام باید حداقل 2 حرف باشد'),
+  lastName: z.string().trim().min(2, 'نام خانوادگی باید حداقل 2 حرف باشد'),
+  displayName: z.string().trim().min(3, 'نام نمایشی باید حداقل 3 حرف باشد'),
   username: z.string()
+    .trim()
     .min(3, 'نام کاربری باید حداقل 3 حرف باشد')
     .max(30, 'نام کاربری باید حداکثر 30 حرف باشد')
     .regex(/^[a-zA-Z0-9_-]+$/, 'نام کاربری فقط می‌تواند شامل حروف انگلیسی، اعداد، خط تیره و آندرلاین باشد'),
-  avatarUrl: z.string().url('آدرس آواتار نامعتبر است').optional().or(z.literal('')),
-  coverUrl: z.string().url('آدرس کاور نامعتبر است').optional().or(z.literal('')),
+  avatarUrl: optionalImageUrl('آدرس آواتار نامعتبر است'),
+  coverUrl: optionalImageUrl('آدرس کاور نامعتبر است'),
   city: z.string().optional(),
   bio: z.string().max(500, 'بیوگرافی باید حداکثر 500 حرف باشد').optional(),
-  telegramLink: z.string().url('آدرس تلگرام نامعتبر است').optional().or(z.literal('')),
-  linkedinLink: z.string().url('آدرس لینکدین نامعتبر است').optional().or(z.literal('')),
-  githubLink: z.string().url('آدرس گیت‌هاب نامعتبر است').optional().or(z.literal('')),
-  websiteLink: z.string().url('آدرس وبسایت نامعتبر است').optional().or(z.literal('')),
+  telegramLink: optionalSocial,
+  linkedinLink: optionalSocial,
+  githubLink: optionalSocial,
+  websiteLink: optionalSocial,
 })
 
 // Onboarding Step 2: Main Field

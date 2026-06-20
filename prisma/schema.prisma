@@ -59,6 +59,9 @@ model User {
   onboardingCompleted Boolean @default(false)
   onboardingStep   Int       @default(1)
 
+  // Whether the user has answered the past-events attendance survey
+  pastEventsAnswered Boolean  @default(false)
+
   // Gamification
   points          Int       @default(0)
   level           Int       @default(1)

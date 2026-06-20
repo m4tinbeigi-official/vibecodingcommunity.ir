@@ -136,7 +136,8 @@ export default function OnboardingPage() {
         if (isLastStep) {
           setCompleted(true)
           setTimeout(() => {
-            router.push('/dashboard')
+            // Ask about attendance at our past events before the dashboard.
+            router.push('/past-events')
           }, 2000)
         } else {
           setStep(stepNumber + 1)

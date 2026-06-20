@@ -11,6 +11,8 @@ const labels: Record<Lang, {
   resources: string
   group: string
   channel: string
+  poweredBy: string
+  brand: string
 }> = {
   fa: {
     tagline: 'انجمن وایب کدینگ ایران',
@@ -20,6 +22,8 @@ const labels: Record<Lang, {
     resources: 'منابع',
     group: 'گروه تلگرام',
     channel: 'کانال تلگرام',
+    poweredBy: 'قدرت‌گرفته از',
+    brand: 'نقطه',
   },
   en: {
     tagline: 'Vibe Coding Community',
@@ -29,6 +33,8 @@ const labels: Record<Lang, {
     resources: 'Resources',
     group: 'Telegram Group',
     channel: 'Telegram Channel',
+    poweredBy: 'Powered by',
+    brand: 'Noqte',
   },
   ar: {
     tagline: 'مجتمع Vibe Coding',
@@ -38,6 +44,8 @@ const labels: Record<Lang, {
     resources: 'الموارد',
     group: 'مجموعة تلجرام',
     channel: 'قناة تلجرام',
+    poweredBy: 'مشغّل بواسطة',
+    brand: 'Noqte',
   },
 }
 
@@ -65,14 +73,14 @@ export default function SiteFooter({ lang = 'fa' }: { lang?: Lang }) {
         <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-400">
           <span>© {new Date().getFullYear()} {t.tagline}</span>
           <span>
-            Power by{' '}
+            {t.poweredBy}{' '}
             <a
               href="https://noqte.pro"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
             >
-              Noqte
+              {t.brand}
             </a>
           </span>
         </div>

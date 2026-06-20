@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { User, LogOut, Settings, Bell, UserPlus, Briefcase, ArrowUp, Plus, Edit, Trash2 } from 'lucide-react'
+import { User, LogOut, Settings, Bell, UserPlus, Briefcase, ArrowUp, Plus, Edit, Trash2, CalendarCheck } from 'lucide-react'
 import axios from 'axios'
 import Link from 'next/link'
 
@@ -183,6 +183,29 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Past events attendance survey prompt */}
+        {userData.pastEventsAnswered === false && (
+          <div className="bg-white dark:bg-gray-800 border border-primary-200 dark:border-primary-800 rounded-lg shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <CalendarCheck className="w-6 h-6 text-primary-600 dark:text-primary-400 shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  در رویدادهای گذشته ما شرکت کرده‌اید؟
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  لطفاً برای دو رویداد گذشته جامعه، جداگانه مشخص کنید که در آن‌ها حضور داشته‌اید یا خیر.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/past-events"
+              className="self-start md:self-auto whitespace-nowrap px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              پاسخ می‌دهم
+            </Link>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-6">

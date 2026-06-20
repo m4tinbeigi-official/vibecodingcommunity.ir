@@ -42,16 +42,19 @@ export async function POST(request: NextRequest) {
         const validatedStep1 = onboardingStep1Schema.safeParse(data)
         if (!validatedStep1.success) {
           return NextResponse.json(
-            { error: 'Validation failed', details: validatedStep1.error.errors },
+            {
+              error: validatedStep1.error.errors[0]?.message || 'اطلاعات واردشده نامعتبر است',
+              details: validatedStep1.error.errors,
+            },
             { status: 400 }
           )
         }
 
         // Check username availability if provided
-        if (data.username) {
+        if (validatedStep1.data.username) {
           const existingUser = await prisma.user.findFirst({
             where: {
-              username: data.username,
+              username: validatedStep1.data.username,
               NOT: { id: session.user.id }
             }
           })
@@ -64,19 +67,20 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        const step1 = validatedStep1.data
         Object.assign(updateData, {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          displayName: data.displayName,
-          username: data.username,
-          avatarUrl: data.avatarUrl || null,
-          coverUrl: data.coverUrl || null,
-          city: data.city || null,
-          bio: data.bio || null,
-          telegramLink: data.telegramLink || null,
-          linkedinLink: data.linkedinLink || null,
-          githubLink: data.githubLink || null,
-          websiteLink: data.websiteLink || null,
+          firstName: step1.firstName,
+          lastName: step1.lastName,
+          displayName: step1.displayName,
+          username: step1.username,
+          avatarUrl: step1.avatarUrl || null,
+          coverUrl: step1.coverUrl || null,
+          city: step1.city || null,
+          bio: step1.bio || null,
+          telegramLink: step1.telegramLink || null,
+          linkedinLink: step1.linkedinLink || null,
+          githubLink: step1.githubLink || null,
+          websiteLink: step1.websiteLink || null,
         })
         break
       case 2:

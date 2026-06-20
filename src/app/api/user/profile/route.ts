@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
         profilePublic: true,
         onboardingCompleted: true,
         onboardingStep: true,
+        pastEventsAnswered: true,
         points: true,
         level: true,
         createdAt: true,
@@ -88,7 +89,10 @@ export async function PATCH(request: NextRequest) {
 
     if (!validatedData.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validatedData.error.errors },
+        {
+          error: validatedData.error.errors[0]?.message || 'اطلاعات واردشده نامعتبر است',
+          details: validatedData.error.errors,
+        },
         { status: 400 }
       )
     }
