@@ -37,6 +37,10 @@ services:
         condition: service_healthy
     networks:
       - internal
+    # Published on loopback so the host nginx (vibecodingcommunity.ir) can
+    # proxy_pass to 127.0.0.1:3000.
+    ports:
+      - "127.0.0.1:3000:3000"
     expose:
       - "3000"
 
