@@ -354,3 +354,23 @@ model AdminActionLog {
   @@index([targetType])
   @@index([createdAt])
 }
+
+// Server Information model
+model Server {
+  id            String   @id @default(cuid())
+  name          String   // Server name/label
+  ipAddress     String   @unique
+  operatingSystem String  // OS name
+  cpu           String   // CPU specs (e.g., "2 cores")
+  ram           String   // RAM (e.g., "4 GB")
+  storage       String   // Storage (e.g., "40 TB SSD")
+  macAddress    String?
+  username      String
+  passwordHash  String   // Encrypted password
+  description   String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([ipAddress])
+  @@index([createdAt])
+}
