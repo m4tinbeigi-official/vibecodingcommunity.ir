@@ -19,6 +19,12 @@ RUN npm install --omit=dev
 COPY .next/standalone ./
 COPY .next/static ./.next/static
 
+# Static assets (fonts, robots, etc.) — required for standalone output
+COPY public ./public
+
+# Pre-create upload dirs so the mounted volume inherits the app user's ownership
+RUN mkdir -p public/uploads/avatars public/uploads/projects
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

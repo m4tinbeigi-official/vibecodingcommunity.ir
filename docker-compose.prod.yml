@@ -35,6 +35,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # User-uploaded files (avatars, project images) must survive recreates
+    volumes:
+      - uploads_data:/app/public/uploads
     networks:
       - internal
     # Published on loopback so the host nginx (vibecodingcommunity.ir) can
@@ -76,6 +79,7 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+  uploads_data:
 
 networks:
   internal:
