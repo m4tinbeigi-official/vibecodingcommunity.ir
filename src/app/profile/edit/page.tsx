@@ -18,6 +18,7 @@ export default function ProfileEditPage() {
   const { data: session, status: sessionStatus } = useSession()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -101,6 +102,31 @@ export default function ProfileEditPage() {
         ? formData[field].filter(item => item !== value)
         : [...formData[field], value],
     })
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    setError('')
+    try {
+      const formDataObj = new FormData()
+      formDataObj.append('file', file)
+
+      const response = await axios.post('/api/upload/avatar', formDataObj, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      if (response.data.success) {
+        setFormData({ ...formData, avatarUrl: response.data.url })
+        setSuccess('عکس پروفایل بروزرسانی شد')
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'خطا در اپلود عکس')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -257,15 +283,35 @@ export default function ProfileEditPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
-                  لینک آواتار
+                  عکس پروفایل
                 </label>
-                <input
-                  type="url"
-                  value={formData.avatarUrl}
-                  onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right"
-                  placeholder="https://example.com/avatar.jpg"
-                />
+                <div className="space-y-3">
+                  {formData.avatarUrl && (
+                    <img
+                      src={formData.avatarUrl}
+                      alt="پروفایل"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                    />
+                  )}
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      disabled={uploading}
+                      className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right text-sm disabled:opacity-50"
+                    />
+                    {uploading && <Loader2 className="w-5 h-5 animate-spin text-primary-600" />}
+                  </div>
+                  <p className="text-xs text-gray-500 text-right">یا لینک مستقیم:</p>
+                  <input
+                    type="url"
+                    value={formData.avatarUrl}
+                    onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right text-sm"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                </div>
               </div>
 
               <div className="md:col-span-2">
