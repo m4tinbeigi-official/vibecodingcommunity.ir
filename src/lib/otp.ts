@@ -102,16 +102,23 @@ export async function createOTPRecord(
   })
 }
 
-// Verify and consume OTP
+// Verify and consume OTP.
+//
+// This is intentionally idempotent: the latest OTP for the phone is accepted as
+// long as it matches and has not expired, even if it was already marked
+// `verified`. The phone-login flow may verify the same code twice in quick
+// succession (e.g. an older cached client that calls /api/auth/verify-otp and
+// then signs in — both run this function). Requiring `verified: false` made the
+// second call fail with "code not found" immediately after the first reported
+// the code as correct. The 5-minute expiry still bounds any reuse.
 export async function verifyAndConsumeOTP(
   phoneNumber: string,
   otp: string
 ): Promise<{ valid: boolean; error?: string }> {
-  // Find the latest OTP for this phone number
+  // Find the latest OTP for this phone number (verified or not)
   const otpRecord = await prisma.phoneOTP.findFirst({
     where: {
-      phoneNumber,
-      verified: false
+      phoneNumber
     },
     orderBy: {
       createdAt: 'desc'
@@ -133,11 +140,13 @@ export async function verifyAndConsumeOTP(
     return { valid: false, error: 'کد تایید اشتباه است' }
   }
 
-  // Mark as verified
-  await prisma.phoneOTP.update({
-    where: { id: otpRecord.id },
-    data: { verified: true }
-  })
+  // Mark as verified (idempotent — safe to skip if already verified)
+  if (!otpRecord.verified) {
+    await prisma.phoneOTP.update({
+      where: { id: otpRecord.id },
+      data: { verified: true }
+    })
+  }
 
   return { valid: true }
 }

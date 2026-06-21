@@ -70,9 +70,10 @@ export default function VerifyPhonePage() {
       }
 
       setSuccess(true)
-      // Redirect to dashboard after successful login
+      // Full navigation (not router.push) so the freshly-set session cookie is
+      // picked up reliably and the dashboard doesn't bounce back to /login.
       setTimeout(() => {
-        router.push('/dashboard')
+        window.location.href = '/dashboard'
       }, 1000)
     } catch (err: any) {
       setError('خطا در تایید کد')
