@@ -38,6 +38,14 @@ export async function GET(
       )
     }
 
+    // Block unapproved projects from non-owners
+    if (!project.approved && project.ownerId !== session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      )
+    }
+
     // Check if current user has upvoted
     let hasUpvoted = false
     if (session?.user?.id) {

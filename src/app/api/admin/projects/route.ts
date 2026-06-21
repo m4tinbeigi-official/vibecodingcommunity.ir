@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { featureProject, deleteProject, logAdminAction } from "@/lib/admin-helpers";
+import { featureProject, approveProject, deleteProject, logAdminAction } from "@/lib/admin-helpers";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 
@@ -19,9 +19,10 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        { approved: "asc" },
+        { createdAt: "desc" },
+      ],
       take: 100,
     });
 
@@ -53,6 +54,12 @@ export async function PATCH(request: Request) {
     switch (action) {
       case "feature":
         result = await featureProject(projectId, value);
+        break;
+      case "approve":
+        result = await approveProject(projectId, true);
+        break;
+      case "reject":
+        result = await approveProject(projectId, false);
         break;
       case "delete":
         result = await deleteProject(projectId);

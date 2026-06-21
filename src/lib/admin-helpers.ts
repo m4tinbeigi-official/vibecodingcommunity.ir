@@ -187,6 +187,14 @@ export async function featureProject(projectId: string, featured: boolean) {
   });
 }
 
+// Approve or reject project
+export async function approveProject(projectId: string, approved: boolean) {
+  return prisma.project.update({
+    where: { id: projectId },
+    data: { approved },
+  });
+}
+
 // Delete project
 export async function deleteProject(projectId: string) {
   return prisma.project.delete({
