@@ -35,9 +35,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # User-uploaded files (avatars, project images) must survive recreates
+    # User-uploaded files (avatars, project images) must survive recreates.
+    # Bind-mounted to the host so nginx can serve /uploads/* directly (Next's
+    # standalone server caches the public listing at startup and won't serve
+    # files written after boot).
     volumes:
-      - uploads_data:/app/public/uploads
+      - ./uploads:/app/public/uploads
     networks:
       - internal
     # Published on loopback so the host nginx (vibecodingcommunity.ir) can
@@ -79,7 +82,6 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
-  uploads_data:
 
 networks:
   internal:
