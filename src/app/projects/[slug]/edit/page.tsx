@@ -14,6 +14,7 @@ export default function EditProjectPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [notFound, setNotFound] = useState(false)
   const [notAuthorized, setNotAuthorized] = useState(false)
@@ -145,13 +146,49 @@ export default function EditProjectPage() {
     }
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    setUploading(true)
+    setError('')
+    try {
+      const formDataObj = new FormData()
+      for (let i = 0; i < files.length; i++) {
+        formDataObj.append('files', files[i])
+      }
+
+      const response = await axios.post('/api/upload/project-images', formDataObj, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      if (response.data.success) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...response.data.urls],
+          imageUrl: prev.imageUrl || response.data.urls[0]
+        }))
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'خطا در اپلود تصاویر')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
     setError('')
 
     try {
-      await axios.patch(`/api/projects/${slug}`, formData)
+      // Auto-generate screenshot URL if demoUrl exists and no imageUrl set
+      let submitData = { ...formData }
+      if (!submitData.imageUrl && submitData.demoUrl) {
+        submitData.imageUrl = `https://api.microlink.io/?url=${encodeURIComponent(submitData.demoUrl)}&screenshot=true`
+      }
+
+      await axios.patch(`/api/projects/${slug}`, submitData)
       router.push(`/projects/${slug}`)
     } catch (err: any) {
       setError(err.response?.data?.error || 'خطا در بروزرسانی پروژه')
@@ -495,15 +532,42 @@ export default function EditProjectPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
-                  لینک تصویر اصلی
+                  تصویر اصلی
                 </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="space-y-3">
+                  {formData.imageUrl && (
+                    <img
+                      src={formData.imageUrl}
+                      alt="تصویر اصلی"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )}
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right text-sm disabled:opacity-50"
+                    />
+                    {uploading && <Loader2 className="w-5 h-5 animate-spin text-primary-600" />}
+                  </div>
+                  <p className="text-xs text-gray-500 text-right">یا لینک مستقیم:</p>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right text-sm"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {formData.demoUrl && !formData.imageUrl && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400 text-right">
+                      💡 اگر تصویری نباشد، اسکرین شات سایت خودکار استفاده خواهد شد
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
