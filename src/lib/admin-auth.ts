@@ -1,9 +1,10 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
+import { authOptions } from "./auth";
 
 export async function requireAdmin() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
     redirect("/login");
@@ -28,7 +29,7 @@ export async function requireAdmin() {
 }
 
 export async function isAdmin() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
     return false;
@@ -49,7 +50,7 @@ export async function isAdmin() {
 }
 
 export async function requireUser() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
     redirect("/login");

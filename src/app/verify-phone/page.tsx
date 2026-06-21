@@ -57,36 +57,25 @@ export default function VerifyPhonePage() {
     setError('')
 
     try {
-      // Verify OTP request
-      const response = await axios.post('/api/auth/verify-otp', {
+      // Sign in directly via NextAuth — it handles OTP verification internally
+      const result = await signIn('phone-otp', {
         phone: phoneNumber,
-        otp: otp
+        otp: otp,
+        redirect: false
       })
 
-      if (response.data.success) {
-        setSuccess(true)
-        // Sign in with NextAuth after successful OTP verification
-        const result = await signIn('phone-otp', {
-          phone: phoneNumber,
-          otp: otp,
-          redirect: false
-        })
-
-        if (result?.error) {
-          setError('خطا در ورود به حساب')
-          setSuccess(false)
-          return
-        }
-
-        // Redirect to dashboard after successful login
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 1000)
-      } else {
-        setError(response.data.message || 'کد تایید اشتباه است')
+      if (result?.error) {
+        setError('کد تایید اشتباه یا منقضی شده است')
+        return
       }
+
+      setSuccess(true)
+      // Redirect to dashboard after successful login
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1000)
     } catch (err: any) {
-      setError(err.response?.data?.message || 'خطا در تایید کد')
+      setError('خطا در تایید کد')
     } finally {
       setLoading(false)
     }

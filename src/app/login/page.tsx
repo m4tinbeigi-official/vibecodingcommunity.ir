@@ -36,10 +36,10 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              ورود به حساب
+              ورود / ثبت‌نام
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              خوش آمدید! لطفاً وارد حساب خود شوید
+              اگر حساب ندارید، به‌صورت خودکار ثبت‌نام می‌شوید
             </p>
           </div>
 
@@ -94,15 +94,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              حساب ندارید؟{' '}
-              <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
-                ثبت‌نام کنید
-              </Link>
-            </p>
-          </div>
         </div>
 
         {/* Back to Home */}

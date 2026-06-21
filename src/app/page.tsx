@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import TelegramCommunity from '@/components/TelegramCommunity'
 
 interface HomeData {
@@ -16,17 +15,12 @@ interface HomeData {
 }
 
 export default function Home() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const [data, setData] = useState<HomeData | null>(null)
   const [loading, setLoading] = useState(true)
+  const { status } = useSession()
+  const isAuthed = status === 'authenticated'
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard')
-      return
-    }
-
     // Fetch home data
     fetch('/api/home')
       .then((res) => res.json())
@@ -35,7 +29,7 @@ export default function Home() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [status, router])
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -56,12 +50,21 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              شروع رایگان
-            </Link>
+            {isAuthed ? (
+              <Link
+                href="/dashboard"
+                className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                رفتن به داشبورد
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                شروع رایگان
+              </Link>
+            )}
             <Link
               href="/projects"
               className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
