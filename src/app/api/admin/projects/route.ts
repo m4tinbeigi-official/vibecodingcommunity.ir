@@ -21,7 +21,7 @@ export async function GET() {
         },
       },
       orderBy: [
-        { approved: "asc" },
+        { approvalStatus: "asc" },
         { createdAt: "desc" },
       ],
       take: 100,
@@ -57,7 +57,7 @@ export async function PATCH(request: Request) {
         result = await featureProject(projectId, value);
         break;
       case "approve":
-        result = await approveProject(projectId, true);
+        result = await approveProject(projectId, "approved");
         // @ts-ignore
         if (result?.ownerId) {
           await awardPointsOnce(
@@ -73,7 +73,10 @@ export async function PATCH(request: Request) {
         }
         break;
       case "reject":
-        result = await approveProject(projectId, false);
+        result = await approveProject(projectId, "rejected");
+        break;
+      case "pending":
+        result = await approveProject(projectId, "pending");
         break;
       case "delete":
         result = await deleteProject(projectId);

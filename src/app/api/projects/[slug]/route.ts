@@ -39,7 +39,7 @@ export async function GET(
     }
 
     // Block unapproved projects from non-owners
-    if (!project.approved && project.ownerId !== session?.user?.id) {
+    if (project.approvalStatus !== "approved" && project.ownerId !== session?.user?.id) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }

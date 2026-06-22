@@ -198,7 +198,7 @@ model Project {
   lookingForTeammates Boolean @default(false)
   neededRoles       String[] @default([])
   featured          Boolean  @default(false)
-  approved          Boolean  @default(false)
+  approvalStatus    String   @default("pending") // pending, approved, rejected
   upvotesCount      Int      @default(0)
   ownerId           String
   owner             User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -212,6 +212,7 @@ model Project {
   @@index([category])
   @@index([status])
   @@index([featured])
+  @@index([approvalStatus])
   @@index([createdAt])
 }
 

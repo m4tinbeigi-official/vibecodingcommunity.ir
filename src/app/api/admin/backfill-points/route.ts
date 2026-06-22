@@ -42,7 +42,7 @@ export async function POST() {
 
     // Approved projects -> owners
     const approvedProjects = await prisma.project.findMany({
-      where: { approved: true },
+      where: { approvalStatus: "approved" },
       select: { id: true, ownerId: true, title: true },
     });
 

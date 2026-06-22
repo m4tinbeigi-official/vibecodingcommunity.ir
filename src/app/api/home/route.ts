@@ -96,7 +96,8 @@ export async function GET() {
     // Get top projects
     const topProjects = await prisma.project.findMany({
       where: {
-        status: { in: ["completed", "mvp"] },
+        approvalStatus: "approved",
+        status: { in: ["mvp", "launched", "in_development"] },
       },
       orderBy: { upvotesCount: "desc" },
       take: 6,
@@ -114,7 +115,7 @@ export async function GET() {
 
     // Get recently registered projects
     const recentProjects = await prisma.project.findMany({
-      where: { approved: true },
+      where: { approvalStatus: "approved" },
       orderBy: { createdAt: "desc" },
       take: 6,
       include: {

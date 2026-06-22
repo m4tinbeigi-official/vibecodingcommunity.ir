@@ -188,10 +188,10 @@ export async function featureProject(projectId: string, featured: boolean) {
 }
 
 // Approve or reject project
-export async function approveProject(projectId: string, approved: boolean) {
+export async function approveProject(projectId: string, status: "approved" | "rejected" | "pending") {
   return prisma.project.update({
     where: { id: projectId },
-    data: { approved },
+    data: { approvalStatus: status },
   });
 }
 
