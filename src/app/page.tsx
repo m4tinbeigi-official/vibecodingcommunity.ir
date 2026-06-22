@@ -10,7 +10,9 @@ interface HomeData {
   pastEvents: any[]
   recentActivities: any[]
   featuredMembers: any[]
+  newMembers: any[]
   topProjects: any[]
+  recentProjects: any[]
   blogPosts: any[]
 }
 
@@ -200,7 +202,7 @@ export default function Home() {
                     >
                       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700">
                         <img
-                          src={member.avatarUrl || "/default-avatar.png"}
+                          src={member.avatarUrl || "/default-avatar.svg"}
                           alt={member.displayName || member.username}
                           className="w-16 h-16 rounded-full mx-auto mb-3 group-hover:scale-110 transition-transform"
                         />
@@ -209,6 +211,45 @@ export default function Home() {
                         </h3>
                         <div className="text-xs text-center text-gray-500 mt-1">
                           سطح {member.level} • {member.points} امتیاز
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Newest Members */}
+            {data.newMembers && data.newMembers.length > 0 && (
+              <section>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    تازه‌واردان جامعه
+                  </h2>
+                  <Link href="/members" className="text-blue-600 hover:text-blue-800">
+                    مشاهده همه ←
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {data.newMembers.map((member) => (
+                    <Link
+                      key={member.id}
+                      href={`/members/${member.username}`}
+                      className="group"
+                    >
+                      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 flex items-center gap-3">
+                        <img
+                          src={member.avatarUrl || "/default-avatar.svg"}
+                          alt={member.displayName || member.username}
+                          className="w-12 h-12 rounded-full object-cover flex-shrink-0 group-hover:scale-110 transition-transform"
+                        />
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                            {member.displayName || member.username}
+                          </h3>
+                          <p className="text-xs text-gray-500 truncate">
+                            {member.mainField || member.city || 'عضو جدید'}
+                          </p>
                         </div>
                       </div>
                     </Link>
@@ -272,7 +313,18 @@ export default function Home() {
                 <div className="grid md:grid-cols-3 gap-6">
                   {data.blogPosts.map((post) => (
                     <div key={post.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700">
-                      <div className="h-32 bg-gradient-to-br from-blue-500 to-purple-600"></div>
+                      {post.imageUrl ? (
+                        <div className="h-40 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          <img
+                            src={post.imageUrl}
+                            alt={post.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-40 bg-gradient-to-br from-blue-500 to-purple-600"></div>
+                      )}
                       <div className="p-6">
                         <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
                           {post.title}
@@ -306,7 +358,7 @@ export default function Home() {
                     {data.recentActivities.slice(0, 5).map((activity) => (
                       <div key={activity.id} className="flex items-center gap-4 p-4">
                         <img
-                          src={activity.user.avatarUrl || "/default-avatar.png"}
+                          src={activity.user.avatarUrl || "/default-avatar.svg"}
                           alt={activity.user.displayName || activity.user.username}
                           className="w-10 h-10 rounded-full"
                         />
@@ -363,7 +415,7 @@ export default function Home() {
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-2">
                               <img
-                                src={project.owner.avatarUrl || "/default-avatar.png"}
+                                src={project.owner.avatarUrl || "/default-avatar.svg"}
                                 alt={project.owner.displayName || project.owner.username}
                                 className="w-6 h-6 rounded-full"
                               />
@@ -375,6 +427,63 @@ export default function Home() {
                               <span>❤️</span>
                               <span>{project.upvotesCount}</span>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Recently Registered Projects */}
+            {data.recentProjects && data.recentProjects.length > 0 && (
+              <section>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    آخرین پروژه‌های ثبت‌شده
+                  </h2>
+                  <Link href="/projects" className="text-blue-600 hover:text-blue-800">
+                    مشاهده همه ←
+                  </Link>
+                </div>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {data.recentProjects.map((project) => (
+                    <Link key={project.id} href={`/projects/${project.slug}`}>
+                      <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 h-full">
+                        {project.imageUrl ? (
+                          <div className="h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                            <img
+                              src={project.imageUrl}
+                              alt={project.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-48 bg-gradient-to-br from-emerald-500 to-blue-600"></div>
+                        )}
+                        <div className="p-4">
+                          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                            {project.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                            {project.shortDescription}
+                          </p>
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={project.owner.avatarUrl || "/default-avatar.svg"}
+                                alt={project.owner.displayName || project.owner.username}
+                                className="w-6 h-6 rounded-full"
+                              />
+                              <span className="text-gray-600 dark:text-gray-300">
+                                {project.owner.displayName || project.owner.username}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(project.createdAt).toLocaleDateString('fa-IR')}
+                            </span>
                           </div>
                         </div>
                       </div>

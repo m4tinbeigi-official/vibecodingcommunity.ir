@@ -73,6 +73,26 @@ export async function GET() {
       },
     });
 
+    // Get newest members (latest people who joined the community)
+    const newMembers = await prisma.user.findMany({
+      where: {
+        suspended: false,
+        username: { not: null },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        mainField: true,
+        city: true,
+        level: true,
+        createdAt: true,
+      },
+    });
+
     // Get top projects
     const topProjects = await prisma.project.findMany({
       where: {
@@ -92,7 +112,24 @@ export async function GET() {
       },
     });
 
-    // Mock blog posts (placeholder for now)
+    // Get recently registered projects
+    const recentProjects = await prisma.project.findMany({
+      where: { approved: true },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      include: {
+        owner: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    // Curated blog posts (with cover images)
     const blogPosts = [
       {
         id: "1",
@@ -101,6 +138,7 @@ export async function GET() {
         date: "1403/04/15",
         author: "علی محمدی",
         readTime: "۵ دقیقه",
+        imageUrl: "https://picsum.photos/seed/nextjs14/600/400",
       },
       {
         id: "2",
@@ -109,6 +147,7 @@ export async function GET() {
         date: "1403/04/10",
         author: "سارا احمدی",
         readTime: "۷ دقیقه",
+        imageUrl: "https://picsum.photos/seed/typescript/600/400",
       },
       {
         id: "3",
@@ -117,6 +156,7 @@ export async function GET() {
         date: "1403/04/05",
         author: "محمد رضایی",
         readTime: "۱۰ دقیقه",
+        imageUrl: "https://picsum.photos/seed/prisma-api/600/400",
       },
     ];
 
@@ -125,7 +165,9 @@ export async function GET() {
       pastEvents,
       recentActivities,
       featuredMembers,
+      newMembers,
       topProjects,
+      recentProjects,
       blogPosts,
     });
   } catch (error) {
