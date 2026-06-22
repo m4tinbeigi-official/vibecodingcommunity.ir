@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { awardPointsOnce, POINTS } from '@/lib/gamification'
 
 // POST /api/events/[slug]/register - Register for event
 export async function POST(
@@ -81,6 +82,16 @@ export async function POST(
         userId: session.user.id,
       }
     })
+
+    // Award points for registering in an event (idempotent per event)
+    await awardPointsOnce(
+      session.user.id,
+      'event_registered',
+      POINTS.REGISTER_EVENT,
+      'eventId',
+      event.id,
+      { eventTitle: event.title }
+    )
 
     return NextResponse.json({
       message: 'ثبت‌نام با موفقیت انجام شد',

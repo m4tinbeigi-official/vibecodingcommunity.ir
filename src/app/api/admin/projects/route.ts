@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { featureProject, approveProject, deleteProject, logAdminAction } from "@/lib/admin-helpers";
+import { awardPointsOnce, POINTS } from "@/lib/gamification";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 
@@ -57,6 +58,19 @@ export async function PATCH(request: Request) {
         break;
       case "approve":
         result = await approveProject(projectId, true);
+        // @ts-ignore
+        if (result?.ownerId) {
+          await awardPointsOnce(
+            // @ts-ignore
+            result.ownerId,
+            "project_approved",
+            POINTS.APPROVE_PROJECT,
+            "projectId",
+            projectId,
+            // @ts-ignore
+            { projectTitle: result.title }
+          );
+        }
         break;
       case "reject":
         result = await approveProject(projectId, false);

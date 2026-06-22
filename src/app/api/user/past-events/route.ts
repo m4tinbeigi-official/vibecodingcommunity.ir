@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { awardPointsOnce, POINTS } from '@/lib/gamification'
 
 // GET /api/user/past-events
 // Returns the completed events plus whether the current user already attended
@@ -73,6 +74,15 @@ export async function POST(request: NextRequest) {
           update: {},
           create: { eventId, userId: session.user.id },
         })
+
+        // Award attendance points (idempotent per event).
+        await awardPointsOnce(
+          session.user.id,
+          'event_attended',
+          POINTS.ATTEND_EVENT,
+          'eventId',
+          eventId,
+        )
       } else {
         // Answered "no": remove any prior attendance record if it exists.
         await prisma.eventRegistration.deleteMany({

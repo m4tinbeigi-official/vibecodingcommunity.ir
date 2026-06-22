@@ -14,6 +14,12 @@ interface HomeData {
   topProjects: any[]
   recentProjects: any[]
   blogPosts: any[]
+  stats?: {
+    members: number
+    projects: number
+    challenges: number
+    resources: number
+  }
 }
 
 export default function Home() {
@@ -78,19 +84,19 @@ export default function Home() {
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">+700</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">عضو فعال</div>
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{(data?.stats?.members ?? 0).toLocaleString('fa-IR')}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">عضو جامعه</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">+100</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">پروژه</div>
+              <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">{(data?.stats?.projects ?? 0).toLocaleString('fa-IR')}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">پروژه ثبت‌شده</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">+20</div>
+              <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">{(data?.stats?.challenges ?? 0).toLocaleString('fa-IR')}</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">چالش</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400">+50</div>
+              <div className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400">{(data?.stats?.resources ?? 0).toLocaleString('fa-IR')}</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">منبع آموزشی</div>
             </div>
           </div>

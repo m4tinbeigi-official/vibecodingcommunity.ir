@@ -129,6 +129,22 @@ export async function GET() {
       },
     });
 
+    // Real community stats for the home hero
+    const [membersCount, projectsCount, challengesCount, resourcesCount] =
+      await Promise.all([
+        prisma.user.count({ where: { suspended: false } }),
+        prisma.project.count(),
+        prisma.challenge.count(),
+        prisma.resource.count(),
+      ]);
+
+    const stats = {
+      members: membersCount,
+      projects: projectsCount,
+      challenges: challengesCount,
+      resources: resourcesCount,
+    };
+
     // Curated blog posts (with cover images)
     const blogPosts = [
       {
@@ -169,6 +185,7 @@ export async function GET() {
       topProjects,
       recentProjects,
       blogPosts,
+      stats,
     });
   } catch (error) {
     console.error("Error fetching home data:", error);

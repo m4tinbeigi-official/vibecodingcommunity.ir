@@ -10,6 +10,7 @@ export const POINTS = {
   WIN_CHALLENGE: 300,
   REGISTER_EVENT: 20, // جدید: برای ثبت‌نام در رویداد
   ATTEND_EVENT: 50,
+  APPROVE_PROJECT: 100, // امتیاز پروژه‌ای که ادمین تایید کرده
   SPEAK_EVENT: 200,
   PROJECT_UPVOTE: 10,
   INVITE_MEMBER: 50,
@@ -162,6 +163,37 @@ export async function awardPoints(
 
   // Check for new badges
   await checkAndAwardBadges(userId, newPoints);
+}
+
+// Award points only once for a given (action + unique key).
+// Uses ActivityLog as the ledger: if an entry with the same action and the same
+// metadata key/value already exists for this user, it's a no-op. This makes
+// awarding safe to re-run (e.g. retroactive backfills, re-submitted surveys).
+// Returns true if points were awarded, false if it was already awarded/skipped.
+export async function awardPointsOnce(
+  userId: string,
+  action: string,
+  points: number,
+  dedupeKey: string,
+  dedupeValue: string,
+  metadata?: any
+): Promise<boolean> {
+  const existing = await prisma.activityLog.findFirst({
+    where: {
+      userId,
+      action,
+      metadata: { path: [dedupeKey], equals: dedupeValue },
+    },
+    select: { id: true },
+  });
+
+  if (existing) return false;
+
+  await awardPoints(userId, action, points, {
+    ...metadata,
+    [dedupeKey]: dedupeValue,
+  });
+  return true;
 }
 
 // Calculate level based on points
