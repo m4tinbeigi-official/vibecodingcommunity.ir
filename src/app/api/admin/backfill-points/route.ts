@@ -16,7 +16,29 @@ export async function POST() {
     const result = {
       projectsAwarded: 0,
       eventsAwarded: 0,
+      profilesAwarded: 0,
     };
+
+    // Users with a complete profile -> profile_completed
+    const completeProfiles = await prisma.user.findMany({
+      where: {
+        mainField: { not: null },
+        experienceLevel: { not: null },
+        collaborationStatus: { not: null },
+      },
+      select: { id: true },
+    });
+
+    for (const u of completeProfiles) {
+      const awarded = await awardPointsOnce(
+        u.id,
+        "profile_completed",
+        POINTS.COMPLETE_PROFILE,
+        "profile",
+        "completed"
+      );
+      if (awarded) result.profilesAwarded++;
+    }
 
     // Approved projects -> owners
     const approvedProjects = await prisma.project.findMany({

@@ -92,6 +92,25 @@ export const onboardingStep6Schema = z.object({
   collaborationStatus: z.string().min(1, 'لطفاً وضعیت همکاری خود را انتخاب کنید'),
 })
 
+// Profile Update Schema (used by PATCH /api/user/profile).
+// Basic info stays required (same rules as onboarding step 1), while the
+// professional fields are optional so users can save a partially-completed
+// profile and fill the rest later from the "complete profile" flow.
+export const profileUpdateSchema = onboardingStep1Schema.extend({
+  mainField: z.string().optional(),
+  secondaryFields: z.array(z.string()).optional(),
+  experienceLevel: z.string().optional(),
+  tools: z.array(z.string()).optional(),
+  membershipGoals: z.array(z.string()).optional(),
+  collaborationStatus: z.string().optional(),
+  showEmail: z.boolean().optional(),
+  showPhone: z.boolean().optional(),
+  showSocialLinks: z.boolean().optional(),
+  profilePublic: z.boolean().optional(),
+})
+
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
+
 // Profile Edit Schema (combines all steps)
 export const profileEditSchema = onboardingStep1Schema
   .merge(onboardingStep2Schema)

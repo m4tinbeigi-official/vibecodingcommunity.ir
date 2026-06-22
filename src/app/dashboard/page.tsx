@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { User, LogOut, Settings, Bell, UserPlus, Briefcase, ArrowUp, Plus, Edit, Trash2, CalendarCheck } from 'lucide-react'
+import { User, LogOut, Settings, Bell, UserPlus, Briefcase, ArrowUp, Plus, Edit, Trash2, CalendarCheck, Home, Users, Calendar, Sparkles } from 'lucide-react'
 import axios from 'axios'
 import Link from 'next/link'
 
@@ -90,46 +90,75 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="min-h-screen">
+      {/* Top Navigation Bar */}
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          {/* Brand + Home link */}
+          <Link href="/" className="flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 font-semibold shrink-0">
+            <Home className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm">صفحه اصلی</span>
+          </Link>
+
+          {/* Nav links */}
+          <div className="flex items-center gap-1 overflow-x-auto">
+            <Link href="/dashboard" className="px-3 py-1.5 text-sm rounded-md bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium whitespace-nowrap">
               داشبورد
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              خوش آمدید، {userData.displayName || session.user.name || 'کاربر'}!
-            </p>
+            </Link>
+            <Link href="/projects" className="px-3 py-1.5 text-sm rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1 whitespace-nowrap">
+              <Briefcase className="w-4 h-4" />
+              <span>پروژه‌ها</span>
+            </Link>
+            <Link href="/events" className="px-3 py-1.5 text-sm rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1 whitespace-nowrap">
+              <Calendar className="w-4 h-4" />
+              <span>رویدادها</span>
+            </Link>
+            <Link href="/members" className="px-3 py-1.5 text-sm rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1 whitespace-nowrap">
+              <Users className="w-4 h-4" />
+              <span>اعضا</span>
+            </Link>
           </div>
-          <div className="flex items-center gap-4">
-            {/* Edit Profile */}
+
+          {/* Right actions */}
+          <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => router.push('/profile/edit')}
               className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               title="ویرایش پروفایل"
             >
-              <UserPlus className="w-6 h-6" />
+              <Settings className="w-5 h-5" />
             </button>
-
-            {/* Notifications */}
-            <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-              <Bell className="w-6 h-6" />
-            </button>
-
-            {/* Settings */}
-            <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-              <Settings className="w-6 h-6" />
-            </button>
-
-            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
               title="خروج"
             >
-              <LogOut className="w-6 h-6" />
+              <LogOut className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="p-4 md:p-8">
+      {/* User greeting header */}
+      <header className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              خوش آمدید، {userData.displayName || session.user.name || 'کاربر'}!
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              داشبورد شخصی شما
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {userData.avatarUrl ? (
+              <img src={userData.avatarUrl} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-primary-600" />
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -183,6 +212,29 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Complete-profile prompt (awards points once completed) */}
+        {!(userData.mainField && userData.experienceLevel && userData.collaborationStatus) && (
+          <div className="bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 rounded-lg shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-6 h-6 text-amber-500 shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  پروفایلت را کامل کن و ۵۰ امتیاز بگیر
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  حوزه فعالیت، سطح تجربه و وضعیت همکاری‌ات را اضافه کن تا اعضای دیگر بهتر پیدایت کنند.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/profile/edit"
+              className="self-start md:self-auto whitespace-nowrap px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+            >
+              تکمیل پروفایل
+            </Link>
+          </div>
+        )}
 
         {/* Past events attendance survey prompt */}
         {userData.pastEventsAnswered === false && (
@@ -363,6 +415,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   )
 }

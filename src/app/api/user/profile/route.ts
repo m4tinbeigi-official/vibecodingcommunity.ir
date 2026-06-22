@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { onboardingStep1Schema } from '@/lib/validations'
+import { profileUpdateSchema } from '@/lib/validations'
+import { awardPointsOnce, POINTS } from '@/lib/gamification'
+
+// A profile counts as "complete" once these professional fields are filled.
+function isProfileComplete(u: {
+  mainField?: string | null
+  experienceLevel?: string | null
+  collaborationStatus?: string | null
+}) {
+  return !!(u.mainField && u.experienceLevel && u.collaborationStatus)
+}
 
 // GET /api/user/profile - Get current user profile
 export async function GET(request: NextRequest) {
@@ -85,7 +95,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
 
     // Validate the data
-    const validatedData = onboardingStep1Schema.safeParse(body)
+    const validatedData = profileUpdateSchema.safeParse(body)
 
     if (!validatedData.success) {
       return NextResponse.json(
@@ -120,7 +130,19 @@ export async function PATCH(request: NextRequest) {
       data: validatedData.data
     })
 
-    return NextResponse.json(updatedUser)
+    // Award profile-completion points once when the profile becomes complete.
+    let pointsAwarded = false
+    if (isProfileComplete(updatedUser)) {
+      pointsAwarded = await awardPointsOnce(
+        session.user.id,
+        'profile_completed',
+        POINTS.COMPLETE_PROFILE,
+        'profile',
+        'completed'
+      )
+    }
+
+    return NextResponse.json({ ...updatedUser, pointsAwarded })
 
   } catch (error) {
     console.error('Error updating profile:', error)
