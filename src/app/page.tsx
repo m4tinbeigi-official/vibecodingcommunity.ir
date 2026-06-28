@@ -181,6 +181,121 @@ export default function Home() {
         </div>
       </div>
 
+      {/* AI API Tools Section */}
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-12">
+        <div className="text-center mb-10">
+          <span className="inline-block px-3 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full mb-3">
+            ابزارهای پیشنهادی جامعه
+          </span>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            API رایگان مدل‌های هوش مصنوعی
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            این سرویس‌ها دسترسی رایگان به مدل‌های مختلف هوش مصنوعی می‌دهند — هم برای برنامه‌نویسی، هم برای ساخت Agent و تست مدل‌ها.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 text-right mb-8">
+          {/* NaraRouter */}
+          <a
+            href="https://router.bynara.id/register?ref=NMAP6F9D"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-3xl">🔀</div>
+              <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full font-medium">
+                رایگان
+              </span>
+            </div>
+            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+              NaraRouter
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+              API Router برای تست مدل‌ها، کدنویسی و وصل‌کردن Agent‌ها. پلن رایگان ۷ میلیون توکن روزانه می‌دهد.
+            </p>
+            <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+              MiMo V2.5 Pro • کانتکست ۱ میلیون توکن ✓
+            </div>
+          </a>
+
+          {/* AgentRouter */}
+          <a
+            href="https://agentrouter.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-3xl">🤖</div>
+              <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">
+                $۱۲۵ رایگان
+              </span>
+            </div>
+            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              AgentRouter
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+              ۱۲۵ دلار اعتبار رایگان با پشتیبانی از GPT و Claude — مناسب برای ساخت Agent و پروژه‌های AI.
+            </p>
+            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+              GPT • Claude • بدون کارت بانکی ✓
+            </div>
+          </a>
+
+          {/* Bluesminds */}
+          <a
+            href="https://api.bluesminds.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 hover:border-cyan-300 dark:hover:border-cyan-600"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-3xl">💎</div>
+              <span className="text-xs px-2 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded-full font-medium">
+                $۱۰۰ رایگان
+              </span>
+            </div>
+            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+              Bluesminds
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+              ۱۰۰ دلار اعتبار رایگان با دسترسی به مدل‌های بیشتر و متنوع‌تر.
+            </p>
+            <div className="text-xs text-cyan-600 dark:text-cyan-400 font-medium">
+              مدل‌های متنوع • دسترسی سریع ✓
+            </div>
+          </a>
+        </div>
+
+        {/* How to use */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 flex items-start gap-3">
+            <div className="text-2xl flex-shrink-0">💻</div>
+            <div>
+              <p className="font-semibold text-sm text-gray-900 dark:text-white mb-1">برنامه‌نویس هستید؟</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                API Key را بگیرید و با VS Code و Cline مستقیم وصل شوید — سرعت کدنویسی چند برابر می‌شود.
+              </p>
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 flex items-start gap-3">
+            <div className="text-2xl flex-shrink-0">⚡</div>
+            <div>
+              <p className="font-semibold text-sm text-gray-900 dark:text-white mb-1">برنامه‌نویس نیستید؟</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                API Key را بگیرید، وارد{' '}
+                <a href="https://B2n.ir/newapi" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  B2n.ir/newapi
+                </a>{' '}
+                شوید، آدرس سرویس و کلید را وارد کنید و از مدل‌ها استفاده کنید.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Telegram Community */}
       <TelegramCommunity lang="fa" />
 
